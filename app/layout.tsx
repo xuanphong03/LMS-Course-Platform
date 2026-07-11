@@ -40,18 +40,15 @@ export default function RootLayout({
                 montserrat.variable,
             )}
         >
-            <body className='flex min-h-full flex-col'>
+            <body>
                 <ThemeProvider
                     attribute='class'
                     defaultTheme='system'
                     enableSystem
                     disableTransitionOnChange
                 >
-                    {/* <ThemeToggle /> */}
-                    <main>
-                        {children}
-                        <Toaster />
-                    </main>
+                    {children}
+                    <Toaster />
                 </ThemeProvider>
             </body>
         </html>
