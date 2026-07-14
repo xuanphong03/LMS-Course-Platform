@@ -23,7 +23,7 @@ export const courseCreationFormSchema = z.object({
         .string()
         .min(3, 'Short description must be at least 3 characters')
         .max(200, 'Short description must be at most 200 characters.'),
-    fileKey: z.string().min(1, 'Please enter thumbnail url').url('Thumbnail url is invalid'),
+    fileKey: z.string().min(1, 'Please upload a thumbnail'),
     price: z.coerce.number().min(1),
     duration: z.coerce.number().min(1, 'Duration mus be at least 1 hour').max(500, 'Duration mus be at most 500 hours'),
     level: z.enum(courseLevels, { message: 'Course level is required' }),

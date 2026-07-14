@@ -1,3 +1,5 @@
+import 'server-only'
+
 import { env } from '@/lib/env'
 import arcjet, { detectBot, detectPromptInjection, sensitiveInfo, shield, tokenBucket } from '@arcjet/next'
 

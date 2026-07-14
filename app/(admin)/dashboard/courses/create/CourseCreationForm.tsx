@@ -19,6 +19,7 @@ import RHFInputField from '@/components/forms/RHFInputField'
 import RHFTextareaField from '@/components/forms/RHFTextareaField'
 import RHFSelectField from '@/components/forms/RHFSelectField'
 import RichTextEditor from '@/components/rich-text-editor/RichTextEditor'
+import RHFFileUploader from '@/components/forms/RHFFileUploader'
 
 export default function CourseCreationForm() {
     const form = useForm<CourseCreationFormInputType, unknown, CourseCreationFormDataType>({
@@ -27,8 +28,8 @@ export default function CourseCreationForm() {
             title: 'Title',
             slug: 'title',
             shortDescription: 'Description',
-            description: '',
-            fileKey: 'http://localhost:3000/dashboard/courses/create',
+            description: '<p>Description</p> <h1>Hello world</h1>',
+            fileKey: '',
             category: courseCategories[0],
             level: 'Beginner',
             duration: 1,
@@ -127,12 +128,11 @@ export default function CourseCreationForm() {
                     </Field>
                 )}
             />
-            <RHFInputField
+            <RHFFileUploader
                 isRequired
                 id='fileKey'
                 name='fileKey'
-                label='Thumbnail url'
-                placeholder='Enter thumbnail url...'
+                label='Thumbnail'
                 control={form.control}
             />
 
