@@ -57,7 +57,7 @@ export default function CourseCreationForm() {
             if (result.status === 'success') {
                 toast.success(result.message)
                 form.reset()
-                router.push(ROUTES.COURSES)
+                router.push(ROUTES.DASHBOARD_COURSES)
             } else if (result.status === 'error') {
                 toast.error(result.message)
             }
