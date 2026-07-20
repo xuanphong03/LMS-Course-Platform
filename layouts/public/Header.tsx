@@ -5,6 +5,7 @@ import { ROUTES } from '@/consts/routes'
 import { UserDropdown } from '@/layouts/public/_components/UserDropdown'
 import { authClient } from '@/lib/auth-client'
 import { LogIn } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 
 interface NavigationItemProps {
@@ -24,7 +25,15 @@ export default function Header() {
     return (
         <header className='bg-background/95 backdrop-blur-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b'>
             <div className='mx-auto flex max-w-350 items-center justify-between space-x-8 py-4'>
-                <Link href={ROUTES.HOME}>Logo</Link>
+                <Link href={ROUTES.HOME}>
+                    <Image
+                        alt='LMS Courses Platform'
+                        src='/images/logo.svg'
+                        width={150}
+                        height={50}
+                        className='h-auto w-32'
+                    />
+                </Link>
 
                 {/* Desktop navigation */}
                 <div className='hidden sm:flex sm:flex-1 sm:items-center sm:justify-between'>

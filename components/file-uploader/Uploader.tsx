@@ -11,6 +11,7 @@ import {
     RenderUploadedState,
     RenderUploadingState,
 } from '@/components/file-uploader'
+import { ENDPOINTS } from '@/consts/endpoints'
 
 interface UploaderState {
     id: string | null
@@ -49,7 +50,7 @@ export default function Uploader({ id, value, onChange }: UploaderProps) {
                 progress: 0,
             }))
             // 1. Get presigned URL
-            const presignedResponse = await fetch('/api/s3/upload', {
+            const presignedResponse = await fetch(ENDPOINTS.UPLOAD_FILE_S3, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -63,7 +64,18 @@ export default function Uploader({ id, value, onChange }: UploaderProps) {
             if (!presignedResponse.ok) {
                 const errorResponse = (await presignedResponse.json().catch(() => null)) as { message?: string } | null
                 toast.error(errorResponse?.message ?? 'Failed to get presigned URL')
-                setFileState((prevState) => ({ ...prevState, uploading: false, progress: 0, error: true }))
+                setFileState((prevState) => ({
+                    ...prevState,
+                    uploading: false,
+                    progress: 0,
+                    error: true,
+                    objectUrl: undefined,
+                }))
+
+                if (fileState.objectUrl && !fileState.objectUrl.startsWith('http')) {
+                    URL.revokeObjectURL(fileState.objectUrl)
+                }
+
                 return
             }
 
@@ -109,7 +121,12 @@ export default function Uploader({ id, value, onChange }: UploaderProps) {
                 progress: 0,
                 error: true,
                 uploading: false,
+                objectUrl: undefined,
             }))
+
+            if (fileState.objectUrl && !fileState.objectUrl.startsWith('http')) {
+                URL.revokeObjectURL(fileState.objectUrl)
+            }
         }
     }
 
@@ -164,7 +181,7 @@ export default function Uploader({ id, value, onChange }: UploaderProps) {
                 isDeleting: true,
             }))
 
-            const response = await fetch('/api/s3/delete', {
+            const response = await fetch(ENDPOINTS.DELETE_FILE_S3, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ key: fileState.key }),
@@ -175,7 +192,7 @@ export default function Uploader({ id, value, onChange }: UploaderProps) {
 
                 setFileState((prevState) => ({
                     ...prevState,
-                    isDeleting: true,
+                    isDeleting: false,
                     error: true,
                 }))
 
@@ -243,6 +260,9 @@ export default function Uploader({ id, value, onChange }: UploaderProps) {
         maxSize: 1024 * 1024, // 1 Mb calculation
         disabled: fileState.uploading || !!fileState.objectUrl,
     })
+    console.log({ fileStateUploading: fileState.uploading, fileStateObjectUrl: fileState.objectUrl })
+    const disabledDrop = fileState.uploading || !!fileState.objectUrl
+    console.log('disabledDrop:', disabledDrop)
 
     useEffect(() => {
         return () => {

@@ -13,22 +13,30 @@ import {
     courseLevels,
     courseStatuses,
 } from '@/schemas/course-creation-form.schema'
-import { PlusIcon, SparkleIcon } from 'lucide-react'
+import { LoaderIcon, PlusIcon, SparkleIcon } from 'lucide-react'
 import slugify from 'slugify'
 import RHFInputField from '@/components/forms/RHFInputField'
 import RHFTextareaField from '@/components/forms/RHFTextareaField'
 import RHFSelectField from '@/components/forms/RHFSelectField'
 import RichTextEditor from '@/components/rich-text-editor/RichTextEditor'
 import RHFFileUploader from '@/components/forms/RHFFileUploader'
+import { useTransition } from 'react'
+import { tryCatch } from '@/lib/try-catch'
+import { CreateCourse } from '@/app/(admin)/dashboard/courses/create/actions'
+import { useRouter } from 'next/navigation'
+import { ROUTES } from '@/consts/routes'
 
 export default function CourseCreationForm() {
+    const router = useRouter()
+    const [isCreateCoursePending, startCreateCourseTransition] = useTransition()
+
     const form = useForm<CourseCreationFormInputType, unknown, CourseCreationFormDataType>({
         resolver: zodResolver(courseCreationFormSchema),
         defaultValues: {
-            title: 'Title',
-            slug: 'title',
-            shortDescription: 'Description',
-            description: '<p>Description</p> <h1>Hello world</h1>',
+            title: '',
+            slug: '',
+            shortDescription: '',
+            description: '',
             fileKey: '',
             category: courseCategories[0],
             level: 'Beginner',
@@ -39,17 +47,21 @@ export default function CourseCreationForm() {
     })
 
     const handleSubmitForm = (values: CourseCreationFormDataType) => {
-        try {
-            console.log(values)
-            toast(
-                <pre className='mt-2 w-85 rounded-md bg-slate-950 p-4'>
-                    <code className='text-white'>{JSON.stringify(values, null, 2)}</code>
-                </pre>,
-            )
-        } catch (error) {
-            console.error('Form submission error', error)
-            toast.error('Failed to submit the form. Please try again.')
-        }
+        startCreateCourseTransition(async () => {
+            const { data: result, error } = await tryCatch(CreateCourse(values))
+            if (error) {
+                toast.error('An unexpected error occurred. Please try again.')
+                return
+            }
+
+            if (result.status === 'success') {
+                toast.success(result.message)
+                form.reset()
+                router.push(ROUTES.COURSES)
+            } else if (result.status === 'error') {
+                toast.error(result.message)
+            }
+        })
     }
 
     const handleGenerateSlug = () => {
@@ -197,9 +209,24 @@ export default function CourseCreationForm() {
                 control={form.control}
             />
 
-            <Button type='submit'>
-                Create new course
-                <PlusIcon size={16} />
+            <Button
+                type='submit'
+                disabled={isCreateCoursePending}
+            >
+                {isCreateCoursePending ? (
+                    <>
+                        Creating...{' '}
+                        <LoaderIcon
+                            size={16}
+                            className='animate-spin'
+                        />
+                    </>
+                ) : (
+                    <>
+                        Create new course
+                        <PlusIcon size={16} />
+                    </>
+                )}
             </Button>
         </form>
     )

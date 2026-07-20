@@ -7,4 +7,5 @@ export const ROUTES = {
     DASHBOARD: '/dashboard',
     DASHBOARD_COURSES: '/dashboard/courses',
     DASHBOARD_COURSES_CREATE: '/dashboard/courses/create',
+    FORBIDDEN: '/forbidden',
 }

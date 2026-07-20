@@ -1,4 +1,4 @@
-import 'server-only'
+// import 'server-only'
 
 import { prisma } from '@/lib/db'
 import { betterAuth } from 'better-auth'
@@ -6,6 +6,7 @@ import { prismaAdapter } from 'better-auth/adapters/prisma'
 import { env } from '@/lib/env'
 import { emailOTP } from 'better-auth/plugins'
 import { resend } from '@/lib/resend'
+import { admin } from 'better-auth/plugins'
 import EmailTemplate from '@/components/ui/email-template'
 
 export const auth = betterAuth({
@@ -33,5 +34,6 @@ export const auth = betterAuth({
                 }
             },
         }),
+        admin(),
     ],
 })
