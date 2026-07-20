@@ -22,7 +22,7 @@ const aj = arcjet
         }),
     )
 
-export async function createCourse(formData: CourseFormDataType): Promise<ApiResponse> {
+export async function editCourse(data: CourseFormDataType, courseId: string): Promise<ApiResponse> {
     const session = await requireAdmin()
 
     try {
@@ -44,31 +44,29 @@ export async function createCourse(formData: CourseFormDataType): Promise<ApiRes
             }
         }
 
-        const validation = courseFormSchema.safeParse(formData)
-
-        if (!validation.success) {
+        const result = courseFormSchema.safeParse(data)
+        if (!result.success) {
             return {
                 status: 'error',
-                message: 'Invalid form data',
+                message: 'Invalid data',
             }
         }
 
-        // Create new course
-        await prisma.course.create({
+        await prisma.course.update({
+            where: { id: courseId, userId: session.user.id },
             data: {
-                ...formData,
-                userId: session?.user?.id as string,
+                ...result.data,
             },
         })
 
         return {
             status: 'success',
-            message: 'Course created successfully',
+            message: 'Course updated successfully',
         }
     } catch {
         return {
             status: 'error',
-            message: 'Failed to create course',
+            message: 'Failed to update course',
         }
     }
 }

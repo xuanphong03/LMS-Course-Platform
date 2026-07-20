@@ -15,7 +15,7 @@ export const courseCategories = [
     'Design',
 ] as const
 
-export const courseCreationFormSchema = z.object({
+export const courseFormSchema = z.object({
     title: z.string().min(3, 'Title must be at least 3 characters.').max(100, 'Title must be at most 100 characters.'),
     slug: z.string().min(3, 'Slug must be at least 3 characters'),
     description: z.string().max(2500, 'Description must be at most 2500 characters.'),
@@ -31,5 +31,4 @@ export const courseCreationFormSchema = z.object({
     status: z.enum(courseStatuses, { message: 'Course status is required' }),
 })
 
-export type CourseCreationFormInputType = z.input<typeof courseCreationFormSchema>
-export type CourseCreationFormDataType = z.infer<typeof courseCreationFormSchema>
+export type CourseFormDataType = z.infer<typeof courseFormSchema>

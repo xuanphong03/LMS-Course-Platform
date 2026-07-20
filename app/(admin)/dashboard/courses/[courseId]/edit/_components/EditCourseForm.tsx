@@ -1,10 +1,17 @@
 'use client'
-import { Controller, useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { toast } from 'sonner'
-import { Field, FieldLabel, FieldError } from '@/components/ui/field'
+
+import slugify from 'slugify'
+import { editCourse } from '@/app/(admin)/dashboard/courses/[courseId]/edit/actions'
+import RHFFileUploader from '@/components/forms/RHFFileUploader'
+import RHFInputField from '@/components/forms/RHFInputField'
+import RHFSelectField from '@/components/forms/RHFSelectField'
+import RHFTextareaField from '@/components/forms/RHFTextareaField'
+import RichTextEditor from '@/components/rich-text-editor/RichTextEditor'
 import { Button } from '@/components/ui/button'
+import { Field, FieldError, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
+import { ROUTES } from '@/consts/routes'
+import { tryCatch } from '@/hooks/try-catch'
 import {
     courseCategories,
     CourseFormDataType,
@@ -12,42 +19,37 @@ import {
     courseLevels,
     courseStatuses,
 } from '@/schemas/course-form.schema'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { LoaderIcon, PlusIcon, SparkleIcon } from 'lucide-react'
-import slugify from 'slugify'
-import RHFInputField from '@/components/forms/RHFInputField'
-import RHFTextareaField from '@/components/forms/RHFTextareaField'
-import RHFSelectField from '@/components/forms/RHFSelectField'
-import RichTextEditor from '@/components/rich-text-editor/RichTextEditor'
-import RHFFileUploader from '@/components/forms/RHFFileUploader'
-import { useTransition } from 'react'
-import { tryCatch } from '@/hooks/try-catch'
-import { createCourse } from '@/app/(admin)/dashboard/courses/create/actions'
 import { useRouter } from 'next/navigation'
-import { ROUTES } from '@/consts/routes'
+import { useTransition } from 'react'
+import { Controller, useForm } from 'react-hook-form'
+import { toast } from 'sonner'
+import { AdminCourseSingularType } from '@/app/data/admin/admin-get-course'
 
-export default function CourseCreationForm() {
+export default function EditCourseForm({ data }: { data: AdminCourseSingularType }) {
     const router = useRouter()
     const [pending, startTransition] = useTransition()
 
     const form = useForm<CourseFormDataType>({
         resolver: zodResolver(courseFormSchema),
         defaultValues: {
-            title: '',
-            slug: '',
-            shortDescription: '',
-            description: '',
-            fileKey: '',
-            category: courseCategories[0],
-            level: 'Beginner',
-            duration: 1,
-            price: 2,
-            status: 'Draft',
+            title: data?.title,
+            slug: data?.slug,
+            shortDescription: data?.shortDescription,
+            description: data?.description,
+            fileKey: data?.fileKey,
+            category: data.category as CourseFormDataType['category'],
+            level: data?.level,
+            duration: data.duration,
+            price: data.price,
+            status: data?.status,
         },
     })
 
     const handleSubmitForm = (values: CourseFormDataType) => {
         startTransition(async () => {
-            const { data: result, error } = await tryCatch(createCourse(values))
+            const { data: result, error } = await tryCatch(editCourse(values, data.id))
             if (error) {
                 toast.error('An unexpected error occurred. Please try again.')
                 return
@@ -214,7 +216,7 @@ export default function CourseCreationForm() {
             >
                 {pending ? (
                     <>
-                        Creating...{' '}
+                        Updating...{' '}
                         <LoaderIcon
                             size={16}
                             className='animate-spin'
@@ -222,7 +224,7 @@ export default function CourseCreationForm() {
                     </>
                 ) : (
                     <>
-                        Create new course
+                        Update course
                         <PlusIcon size={16} />
                     </>
                 )}

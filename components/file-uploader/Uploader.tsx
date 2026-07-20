@@ -12,6 +12,7 @@ import {
     RenderUploadingState,
 } from '@/components/file-uploader'
 import { ENDPOINTS } from '@/consts/endpoints'
+import { useConstruct } from '@/hooks/use-construct'
 
 interface UploaderState {
     id: string | null
@@ -31,6 +32,7 @@ interface UploaderProps {
     onChange?: (value: string) => void
 }
 export default function Uploader({ id, value, onChange }: UploaderProps) {
+    const fileUrl = useConstruct(value || '')
     const [fileState, setFileState] = useState<UploaderState>({
         error: false,
         file: null,
@@ -40,6 +42,7 @@ export default function Uploader({ id, value, onChange }: UploaderProps) {
         isDeleting: false,
         fileType: 'image',
         key: value,
+        objectUrl: fileUrl,
     })
 
     const handleUploadFile = async (file: File) => {
