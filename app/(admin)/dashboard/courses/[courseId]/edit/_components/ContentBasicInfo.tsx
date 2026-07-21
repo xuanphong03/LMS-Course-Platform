@@ -1,8 +1,8 @@
 import EditCourseForm from '@/app/(admin)/dashboard/courses/[courseId]/edit/_components/EditCourseForm'
-import { AdminCourseType } from '@/app/data/admin/admin-get-course'
+import { AdminCourseSingularType } from '@/app/data/admin/admin-get-course'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
-export default function ContentBasicInfo({ data }: { data: AdminCourseType }) {
+export default function ContentBasicInfo({ data }: { data: AdminCourseSingularType }) {
     return (
         <Card>
             <CardHeader>

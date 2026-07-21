@@ -11,4 +11,6 @@ export const ROUTES = {
     DASHBOARD_COURSES_DELETE: (courseId: string) => `/dashboard/courses/${courseId}/delete`,
     COURSE_DETAIL: (courseId: string) => `/courses/${courseId}`,
     FORBIDDEN: '/forbidden',
+    DASHBOARD_LESSONS_EDIT: (courseId: string, chapterId: string, lessonId: string) =>
+        `/dashboard/courses/${courseId}/${chapterId}/${lessonId}`,
 }

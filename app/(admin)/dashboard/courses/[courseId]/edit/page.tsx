@@ -26,7 +26,7 @@ export default async function EditCoursePage({ params }: iAppProps) {
                     <ContentBasicInfo data={data} />
                 </TabsContent>
                 <TabsContent value='course-structure'>
-                    <ContentCourseStructure />
+                    <ContentCourseStructure data={data} />
                 </TabsContent>
             </Tabs>
         </div>
