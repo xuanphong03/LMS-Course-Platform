@@ -17,7 +17,7 @@ export default async function EditCoursePage({ params }: iAppProps) {
                 Edit course: <span className='text-primary underline'>{data.title}</span>
             </h1>
 
-            <Tabs defaultValue=''>
+            <Tabs defaultValue='basic-info'>
                 <TabsList className='w-full'>
                     <TabsTrigger value='basic-info'>Basic Info</TabsTrigger>
                     <TabsTrigger value='course-structure'>Course Structure</TabsTrigger>

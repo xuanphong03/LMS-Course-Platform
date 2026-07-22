@@ -1,39 +1,48 @@
 'use client'
-import { CourseStructureType } from '@/app/(admin)/dashboard/courses/[courseId]/edit/_components/CourseStructure'
-import LessonGroup, { getLessonGroupId } from '@/app/(admin)/dashboard/courses/[courseId]/edit/_components/LessonGroup'
-import SortableItem from '@/app/(admin)/dashboard/courses/[courseId]/edit/_components/SortableItem'
-import { reorderChapters, reorderLessons } from '@/app/(admin)/dashboard/courses/[courseId]/edit/actions'
-import { AdminCourseSingularType } from '@/app/data/admin/admin-get-course'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import type { CourseStructureItem } from '@/app/(admin)/dashboard/courses/[courseId]/edit/_components/course-structure/course-structure.types'
+import { CourseStructureChapter } from '@/app/(admin)/dashboard/courses/[courseId]/edit/_components/course-structure/CourseStructureChapter'
+import {
+    getChapterOrder,
+    getLessonGroupId,
+    getLessonOrder,
+    hasLessonOrderChanged,
+} from '@/app/(admin)/dashboard/courses/[courseId]/edit/_components/course-structure/course-structure.utils'
+import { useCourseStructureReorder } from '@/app/(admin)/dashboard/courses/[courseId]/edit/_components/course-structure/useCourseStructureReorder'
 import { move } from '@dnd-kit/helpers'
+import { AutoScroller } from '@dnd-kit/dom'
 import { DragDropProvider, DragEndEvent, DragOverEvent, DragStartEvent } from '@dnd-kit/react'
 import { isSortable } from '@dnd-kit/react/sortable'
-import { ChevronDownIcon, ChevronUpIcon, GripVerticalIcon, TrashIcon } from 'lucide-react'
-import { Dispatch, SetStateAction, useEffect, useRef, useTransition } from 'react'
-import { toast } from 'sonner'
+import { useRef } from 'react'
+import type { Dispatch, SetStateAction } from 'react'
 
 interface ChapterGroupProps {
-    data: AdminCourseSingularType
-    items: CourseStructureType[]
-    setItems: Dispatch<SetStateAction<CourseStructureType[]>>
+    courseId: string
+    items: CourseStructureItem[]
+    setItems: Dispatch<SetStateAction<CourseStructureItem[]>>
 }
 
-export default function ChapterGroup({ data, items, setItems }: ChapterGroupProps) {
+export default function ChapterGroup({ courseId, items, setItems }: ChapterGroupProps) {
     const itemsSnapshot = useRef(items)
-    const latestItems = useRef(items)
-    const [, startTransition] = useTransition()
+    const { latestItemsRef, setOptimisticItems, enqueueLessonOrder, enqueueChapterOrder, isReordering } =
+        useCourseStructureReorder({
+            courseId,
+            items,
+            setItems,
+        })
 
     const handleToggleChapter = (chapterId: string) => {
-        setItems(items.map((chapter) => (chapter.id === chapterId ? { ...chapter, isOpen: !chapter.isOpen } : chapter)))
+        setOptimisticItems((currentItems) =>
+            currentItems.map((chapter) =>
+                chapter.id === chapterId ? { ...chapter, isOpen: !chapter.isOpen } : chapter,
+            ),
+        )
     }
 
     const handleDragStart = (event: DragStartEvent) => {
-        // Lưu trạng thái trước khi kéo để có thể khôi phục nếu người dùng hủy
-        // thao tác hoặc quá trình đồng bộ thứ tự với server thất bại.
+        // Lưu trạng thái trước khi kéo để có thể khôi phục nếu người dùng hủy thao tác.
+        // Lỗi server dùng baseline trong hook vì snapshot có thể chứa optimistic state cũ.
         if (event.operation.source) {
-            itemsSnapshot.current = latestItems.current
+            itemsSnapshot.current = latestItemsRef.current
         }
     }
 
@@ -42,7 +51,7 @@ export default function ChapterGroup({ data, items, setItems }: ChapterGroupProp
         // ngay khi đi qua danh sách khác để React luôn đồng bộ với DOM của dnd-kit.
         if (event.operation.source?.type !== 'lesson') return
 
-        setItems((currentItems) => {
+        setOptimisticItems((currentItems) => {
             // Chuyển cấu trúc chapter lồng nhau thành Record<groupId, lessons>
             // để hàm move xử lý thống nhất cả đổi thứ tự và chuyển khác chapter.
             const currentLessonGroups = Object.fromEntries(
@@ -53,16 +62,13 @@ export default function ChapterGroup({ data, items, setItems }: ChapterGroupProp
             // move trả lại cùng tham chiếu khi vị trí không đổi; bỏ qua lần kết xuất thừa.
             if (nextLessonGroups === currentLessonGroups) return currentItems
 
-            // Đưa kết quả về cấu trúc trạng thái ban đầu và chuẩn hóa lại order từ 0.
+            // Đưa kết quả về cấu trúc state ban đầu. Array index là nguồn thứ tự duy nhất,
+            // vì vậy không lưu thêm trường order có thể bị lệch với vị trí thực tế.
             const nextItems = currentItems.map((chapter) => ({
                 ...chapter,
-                lessons: nextLessonGroups[getLessonGroupId(chapter.id)].map((lesson, lessonIndex) => ({
-                    ...lesson,
-                    order: lessonIndex,
-                })),
+                lessons: nextLessonGroups[getLessonGroupId(chapter.id)],
             }))
 
-            latestItems.current = nextItems
             return nextItems
         })
     }
@@ -74,8 +80,7 @@ export default function ChapterGroup({ data, items, setItems }: ChapterGroupProp
         // bản chụp trạng thái; dnd-kit tự hoàn tác phần hiển thị lạc quan của chapter.
         if (event.canceled) {
             if (source?.type === 'lesson') {
-                latestItems.current = itemsSnapshot.current
-                setItems(itemsSnapshot.current)
+                setOptimisticItems(itemsSnapshot.current)
             }
 
             return
@@ -86,42 +91,15 @@ export default function ChapterGroup({ data, items, setItems }: ChapterGroupProp
         if (source.type === 'lesson') {
             // Tạo dữ liệu gửi từ trạng thái cuối cùng sau khi thả. Mỗi lesson cần cả
             // chapterId và position để server hỗ trợ di chuyển khác chapter.
-            const currentLessons = latestItems.current.flatMap((chapter) =>
-                chapter.lessons.map((lesson, position) => ({
-                    id: lesson.id,
-                    chapterId: chapter.id,
-                    position,
-                })),
-            )
-            const previousLessonPositions = new Map(
-                itemsSnapshot.current.flatMap((chapter) =>
-                    chapter.lessons.map((lesson, position) => [lesson.id, `${chapter.id}:${position}`] as const),
-                ),
-            )
-            const hasChanged = currentLessons.some(
-                (lesson) => previousLessonPositions.get(lesson.id) !== `${lesson.chapterId}:${lesson.position}`,
-            )
+            const currentLessons = getLessonOrder(latestItemsRef.current)
+            const hasChanged = hasLessonOrderChanged(currentLessons, itemsSnapshot.current)
 
             // Không gọi Server Action nếu lesson được thả lại vị trí ban đầu.
             if (!hasChanged) return
 
-            // Chỉ đồng bộ cơ sở dữ liệu một lần sau khi thao tác kéo đã hoàn tất.
-            startTransition(() => {
-                const reorderPromise = reorderLessons({ courseId: data.id, lessons: currentLessons }).then((result) => {
-                    if (result.status === 'error') throw new Error(result.message)
-                    return result.message
-                })
-
-                toast.promise(reorderPromise, {
-                    loading: 'Reordering lessons',
-                    success: (message) => message,
-                    error: (error) => {
-                        latestItems.current = itemsSnapshot.current
-                        setItems(itemsSnapshot.current)
-                        return error instanceof Error ? error.message : 'Failed to reorder lessons'
-                    },
-                })
-            })
+            // Chỉ xếp yêu cầu lưu tại đây. Effect sẽ gọi Server Action sau khi React
+            // commit trạng thái thả, tránh giữ lifecycle drop chờ network hoàn tất.
+            enqueueLessonOrder(currentLessons)
 
             return
         }
@@ -133,124 +111,50 @@ export default function ChapterGroup({ data, items, setItems }: ChapterGroupProp
             // thay vì kết xuất lại liên tục trong onDragOver như lesson.
             if (initialIndex === index) return
 
-            const nextItems = [...latestItems.current]
+            const nextItems = [...latestItemsRef.current]
             const [movedChapter] = nextItems.splice(initialIndex, 1)
 
             if (!movedChapter) return
 
             nextItems.splice(index, 0, movedChapter)
 
-            const reorderedItems = nextItems.map((chapter, chapterIndex) => ({
-                ...chapter,
-                order: chapterIndex,
-            }))
-            const chapters = reorderedItems.map((chapter, position) => ({
-                id: chapter.id,
-                position,
-            }))
+            const reorderedItems = nextItems
+            const chapters = getChapterOrder(reorderedItems)
 
-            latestItems.current = reorderedItems
-            setItems(reorderedItems)
+            setOptimisticItems(reorderedItems)
 
-            // Lưu thứ tự chapter sau khi cập nhật lạc quan trên trạng thái cục bộ;
-            // nếu action thất bại, hàm xử lý lỗi sẽ khôi phục bản chụp trạng thái.
-            startTransition(() => {
-                const reorderPromise = reorderChapters({ courseId: data.id, chapters }).then((result) => {
-                    if (result.status === 'error') throw new Error(result.message)
-                    return result.message
-                })
-
-                toast.promise(reorderPromise, {
-                    loading: 'Reordering chapters',
-                    success: (message) => message,
-                    error: (error) => {
-                        latestItems.current = itemsSnapshot.current
-                        setItems(itemsSnapshot.current)
-                        return error instanceof Error ? error.message : 'Failed to reorder chapters'
-                    },
-                })
-            })
+            // Tách việc lưu khỏi onDragEnd để giao diện hoàn tất drop trước khi action
+            // và revalidation bắt đầu chạy.
+            enqueueChapterOrder(chapters)
 
             return
         }
     }
 
-    useEffect(() => {
-        latestItems.current = items
-    }, [items])
-
     return (
         <DragDropProvider
+            // Mở rộng vùng kích hoạt cuộn ở mép trên/dưới để kéo item qua danh sách
+            // dài dễ hơn; tắt tự động cuộn ngang vì chỉ sắp xếp theo chiều dọc.
+            plugins={(defaults) => [
+                ...defaults,
+                AutoScroller.configure({
+                    acceleration: 20,
+                    threshold: { x: 0, y: 0.25 },
+                }),
+            ]}
             onDragStart={handleDragStart}
             onDragOver={handleDragOver}
             onDragEnd={handleDragEnd}
         >
-            {items.map((chapterItem, chapterIndex) => (
-                <SortableItem
-                    data={{ type: 'chapter' }}
-                    key={chapterItem.id}
-                    id={chapterItem.id}
-                    index={chapterIndex}
-                    type='chapter'
-                    accept='chapter'
-                >
-                    {({ handleRef }) => (
-                        <Card>
-                            <Collapsible
-                                open={chapterItem.isOpen}
-                                onOpenChange={() => handleToggleChapter(chapterItem.id)}
-                            >
-                                <div className='border-border flex items-center justify-between border-b p-3'>
-                                    <div className='flex items-center gap-2'>
-                                        <Button
-                                            size='icon'
-                                            type='button'
-                                            variant='ghost'
-                                            ref={handleRef}
-                                            className='cursor-grab opacity-60 hover:opacity-100'
-                                        >
-                                            <GripVerticalIcon className='size-4' />
-                                        </Button>
-                                        <CollapsibleTrigger
-                                            render={
-                                                <Button
-                                                    variant='ghost'
-                                                    className='flex items-center'
-                                                />
-                                            }
-                                        >
-                                            {chapterItem.isOpen ? (
-                                                <ChevronDownIcon className='size-4' />
-                                            ) : (
-                                                <ChevronUpIcon className='size-4' />
-                                            )}
-                                        </CollapsibleTrigger>
-                                        <p className='hover:text-primary cursor-pointer pl-2'>{chapterItem.title}</p>
-                                    </div>
-                                    <Button variant='outline'>
-                                        <TrashIcon className='size-4' />
-                                    </Button>
-                                </div>
-                                <CollapsibleContent>
-                                    <div className='p-1'>
-                                        <LessonGroup
-                                            data={data}
-                                            chapter={chapterItem}
-                                        />
-                                        <div className='p-2'>
-                                            <Button
-                                                variant='outline'
-                                                className='w-full'
-                                            >
-                                                Create new lesson
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </CollapsibleContent>
-                            </Collapsible>
-                        </Card>
-                    )}
-                </SortableItem>
+            {items.map((chapter, index) => (
+                <CourseStructureChapter
+                    key={chapter.id}
+                    courseId={courseId}
+                    chapter={chapter}
+                    index={index}
+                    isDragDisabled={isReordering}
+                    onToggle={handleToggleChapter}
+                />
             ))}
         </DragDropProvider>
     )

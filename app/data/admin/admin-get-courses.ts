@@ -4,9 +4,12 @@ import { requireAdmin } from '@/app/data/admin/require-admin'
 import { prisma } from '@/lib/db'
 
 export async function adminGetCourses() {
-    await requireAdmin()
+    const session = await requireAdmin()
 
     const data = await prisma.course.findMany({
+        where: {
+            userId: session.user.id,
+        },
         orderBy: { createdAt: 'desc' },
         select: {
             id: true,

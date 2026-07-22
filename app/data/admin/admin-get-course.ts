@@ -5,11 +5,12 @@ import { prisma } from '@/lib/db'
 import { notFound } from 'next/navigation'
 
 export async function adminGetCourse(id: string) {
-    await requireAdmin()
+    const session = await requireAdmin()
 
-    const data = await prisma.course.findUnique({
+    const data = await prisma.course.findFirst({
         where: {
-            id: id,
+            id,
+            userId: session.user.id,
         },
         select: {
             id: true,

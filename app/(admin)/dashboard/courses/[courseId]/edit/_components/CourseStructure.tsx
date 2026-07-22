@@ -1,39 +1,18 @@
 'use client'
+import type { CourseStructureItem } from '@/app/(admin)/dashboard/courses/[courseId]/edit/_components/course-structure/course-structure.types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useState } from 'react'
-import { AdminCourseSingularType } from '@/app/data/admin/admin-get-course'
 import ChapterGroup from '@/app/(admin)/dashboard/courses/[courseId]/edit/_components/ChapterGroup'
 
-export type LessonType = {
-    id: string
-    title: string
-    order: number
+interface CourseStructureProps {
+    courseId: string
+    initialItems: CourseStructureItem[]
 }
 
-export type CourseStructureType = {
-    id: string
-    title: string
-    order: number
-    isOpen: boolean
-    lessons: LessonType[]
-}
-
-export default function CourseStructure({ data }: { data: AdminCourseSingularType }) {
-    const [items, setItems] = useState<CourseStructureType[]>(
-        () =>
-            data?.chapters?.map((chapter) => ({
-                id: chapter.id,
-                title: chapter.title,
-                order: chapter.position,
-                isOpen: true,
-                lessons:
-                    chapter?.lessons?.map((lesson) => ({
-                        id: lesson.id,
-                        title: lesson.title,
-                        order: lesson.position,
-                    })) ?? [],
-            })) ?? [],
-    )
+export default function CourseStructure({ courseId, initialItems }: CourseStructureProps) {
+    // Parent key component theo courseId, vì vậy state được khởi tạo lại khi chuyển course
+    // nhưng không bị RSC revalidation cùng course ghi đè lên optimistic order đang hiển thị.
+    const [items, setItems] = useState(initialItems)
 
     return (
         <Card>
@@ -42,7 +21,7 @@ export default function CourseStructure({ data }: { data: AdminCourseSingularTyp
             </CardHeader>
             <CardContent className='space-y-(--card-spacing)'>
                 <ChapterGroup
-                    data={data}
+                    courseId={courseId}
                     items={items}
                     setItems={setItems}
                 />

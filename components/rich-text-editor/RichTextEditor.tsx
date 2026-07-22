@@ -43,7 +43,6 @@ export default function RichTextEditor({
                 ...(id ? { id } : {}),
                 class: 'min-h-80 focus:outline-none p-2',
                 'aria-invalid': invalid ? 'true' : 'false',
-                'aria-label': placeholder ?? name ?? id ?? 'Rich text editor',
                 ...(placeholder ? { placeholder } : {}),
             },
         },

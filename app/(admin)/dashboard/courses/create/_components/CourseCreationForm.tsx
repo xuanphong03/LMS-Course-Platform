@@ -39,8 +39,8 @@ export default function CourseCreationForm() {
             fileKey: '',
             category: courseCategories[0],
             level: 'Beginner',
-            duration: 1,
-            price: 2,
+            duration: 0,
+            price: 0,
             status: 'Draft',
         },
     })

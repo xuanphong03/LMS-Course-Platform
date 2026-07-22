@@ -1,11 +1,17 @@
 'use server'
 
 import { requireAdmin } from '@/app/data/admin/require-admin'
+import {
+    isValidChapterOrder,
+    isValidLessonOrder,
+} from '@/app/(admin)/dashboard/courses/[courseId]/edit/_lib/course-structure-order.validation'
 import { ROUTES } from '@/consts/routes'
 import arcjet, { detectBot, fixedWindow } from '@/lib/arcjet'
 import { prisma } from '@/lib/db'
 import { ApiResponse } from '@/lib/types'
 import { CourseFormDataType, courseFormSchema } from '@/schemas/course-form.schema'
+import { reorderChaptersSchema, reorderLessonsSchema } from '@/schemas/course-structure-order.schema'
+import type { ReorderChaptersInput, ReorderLessonsInput } from '@/schemas/course-structure-order.schema'
 import { request } from '@arcjet/next'
 import { revalidatePath } from 'next/cache'
 
@@ -73,25 +79,19 @@ export async function editCourse(data: CourseFormDataType, courseId: string): Pr
     }
 }
 
-export type ReorderLessonInput = {
-    id: string
-    chapterId: string
-    position: number
-}
-interface reorderLessonsProps {
-    lessons: ReorderLessonInput[]
-    courseId: string
-}
-export async function reorderLessons({ lessons, courseId }: reorderLessonsProps): Promise<ApiResponse> {
+export async function reorderLessons(input: ReorderLessonsInput): Promise<ApiResponse> {
     const session = await requireAdmin()
 
     try {
-        if (!lessons || !lessons.length) {
+        const parsedInput = reorderLessonsSchema.safeParse(input)
+        if (!parsedInput.success) {
             return {
                 status: 'error',
-                message: 'No lessons provided for reordering',
+                message: 'Invalid lesson order',
             }
         }
+
+        const { lessons, courseId } = parsedInput.data
 
         const course = await prisma.course.findFirst({
             where: {
@@ -117,32 +117,17 @@ export async function reorderLessons({ lessons, courseId }: reorderLessonsProps)
             }
         }
 
-        // Không tin tưởng dữ liệu đầu vào từ Server Action. Chỉ chấp nhận chapter và
-        // lesson thực sự thuộc khóa học đã được xác thực quyền truy cập ở trên.
-        const validChapterIds = new Set(course.chapters.map((chapter) => chapter.id))
-        const validLessonIds = new Set(course.chapters.flatMap((chapter) => chapter.lessons.map((lesson) => lesson.id)))
-
-        // Dùng Set để phát hiện ID lesson bị trùng trước khi tạo transaction; nếu không,
-        // cùng một bản ghi có thể bị cập nhật nhiều lần với các vị trí xung đột nhau.
-        const submittedLessonIds = new Set(lessons.map((lesson) => lesson.id))
-
-        // Vị trí phải là số nguyên không âm và bắt đầu từ 0. Client chịu trách nhiệm tạo
-        // thứ tự liên tục; tại boundary này server xác thực từng giá trị riêng lẻ.
-        const hasInvalidLesson = lessons.some(
-            (lesson) =>
-                !validLessonIds.has(lesson.id) ||
-                !validChapterIds.has(lesson.chapterId) ||
-                !Number.isInteger(lesson.position) ||
-                lesson.position < 0,
-        )
-
-        if (hasInvalidLesson || submittedLessonIds.size !== lessons.length) {
+        // Shape hợp lệ chưa đủ: IDs và chapter đích còn phải khớp dữ liệu tin cậy
+        // vừa đọc từ database. Validation ngữ nghĩa được tách riêng để dễ kiểm thử.
+        if (!isValidLessonOrder(course.chapters, lessons)) {
             return {
                 status: 'error',
                 message: 'Invalid lesson order',
             }
         }
 
+        // Full snapshot phải được ghi nguyên tử: chỉ một update lỗi cũng phải rollback
+        // toàn bộ order, nếu không các chapter có thể rơi vào trạng thái nửa cũ nửa mới.
         const updates = lessons.map((lesson) =>
             prisma.lesson.update({
                 where: {
@@ -157,13 +142,14 @@ export async function reorderLessons({ lessons, courseId }: reorderLessonsProps)
 
         await prisma.$transaction(updates)
 
-        revalidatePath(`${ROUTES.DASHBOARD_COURSES_EDIT(courseId)}`)
+        revalidatePath(ROUTES.DASHBOARD_COURSES_EDIT(courseId))
 
         return {
             status: 'success',
             message: 'Lessons reordered successfully',
         }
-    } catch {
+    } catch (error) {
+        console.error('Failed to reorder lessons', error)
         return {
             status: 'error',
             message: 'Failed to reorder lessons',
@@ -171,29 +157,55 @@ export async function reorderLessons({ lessons, courseId }: reorderLessonsProps)
     }
 }
 
-export type ReorderChapterInput = {
-    id: string
-    position: number
-}
-interface reorderChaptersProps {
-    courseId: string
-    chapters: ReorderChapterInput[]
-}
-export async function reorderChapters({ courseId, chapters }: reorderChaptersProps): Promise<ApiResponse> {
-    await requireAdmin()
+export async function reorderChapters(input: ReorderChaptersInput): Promise<ApiResponse> {
+    const session = await requireAdmin()
+
     try {
-        if (!chapters || !chapters.length) {
+        const parsedInput = reorderChaptersSchema.safeParse(input)
+        if (!parsedInput.success) {
             return {
                 status: 'error',
-                message: 'No chapters provided for reordering',
+                message: 'Invalid chapter order',
             }
         }
 
+        const { courseId, chapters } = parsedInput.data
+        const course = await prisma.course.findFirst({
+            where: {
+                id: courseId,
+                userId: session.user.id,
+            },
+            select: {
+                chapters: {
+                    select: { id: true },
+                },
+            },
+        })
+
+        if (!course) {
+            return {
+                status: 'error',
+                message: 'Course not found',
+            }
+        }
+
+        if (
+            !isValidChapterOrder(
+                course.chapters.map((chapter) => chapter.id),
+                chapters,
+            )
+        ) {
+            return {
+                status: 'error',
+                message: 'Invalid chapter order',
+            }
+        }
+
+        // Cập nhật mọi position trong cùng transaction để không lưu thứ tự dở dang.
         const updates = chapters.map((chapter) =>
             prisma.chapter.update({
                 where: {
                     id: chapter.id,
-                    courseId: courseId,
                 },
                 data: {
                     position: chapter.position,
@@ -203,13 +215,14 @@ export async function reorderChapters({ courseId, chapters }: reorderChaptersPro
 
         await prisma.$transaction(updates)
 
-        revalidatePath(`${ROUTES.DASHBOARD_COURSES_EDIT(courseId)}`)
+        revalidatePath(ROUTES.DASHBOARD_COURSES_EDIT(courseId))
 
         return {
             status: 'success',
             message: 'Chapters reordered successfully',
         }
-    } catch {
+    } catch (error) {
+        console.error('Failed to reorder chapters', error)
         return {
             status: 'error',
             message: 'Failed to reorder chapters',
