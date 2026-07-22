@@ -25,7 +25,7 @@ export default function CourseStructure({ data }: { data: AdminCourseSingularTyp
                 id: chapter.id,
                 title: chapter.title,
                 order: chapter.position,
-                isOpen: true, // Default chapters is open
+                isOpen: true,
                 lessons:
                     chapter?.lessons?.map((lesson) => ({
                         id: lesson.id,
@@ -40,7 +40,7 @@ export default function CourseStructure({ data }: { data: AdminCourseSingularTyp
             <CardHeader className='border-border flex flex-row items-center justify-between border-b'>
                 <CardTitle>Chapters</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className='space-y-(--card-spacing)'>
                 <ChapterGroup
                     data={data}
                     items={items}

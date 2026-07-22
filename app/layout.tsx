@@ -70,7 +70,10 @@ export default function RootLayout({
                         zIndex={1600}
                         showAtBottom={false}
                     />
-                    <Toaster richColors />
+                    <Toaster
+                        richColors
+                        closeButton
+                    />
                 </ThemeProvider>
             </body>
         </html>

@@ -161,7 +161,6 @@ export default function Uploader({ id, value, onChange }: UploaderProps) {
     )
 
     const handleOnDropRejected = useCallback((fileRejections: FileRejection[]) => {
-        console.log(fileRejections)
         if (!fileRejections.length) return
         const tooManyFiles = fileRejections.find((rejection) => rejection.errors[0].code === 'too-many-files')
         const fileSizeTooBig = fileRejections.find((rejection) => rejection.errors[0].code === 'file-too-large')
@@ -263,9 +262,6 @@ export default function Uploader({ id, value, onChange }: UploaderProps) {
         maxSize: 1024 * 1024, // 1 Mb calculation
         disabled: fileState.uploading || !!fileState.objectUrl,
     })
-    console.log({ fileStateUploading: fileState.uploading, fileStateObjectUrl: fileState.objectUrl })
-    const disabledDrop = fileState.uploading || !!fileState.objectUrl
-    console.log('disabledDrop:', disabledDrop)
 
     useEffect(() => {
         return () => {

@@ -13,7 +13,6 @@ export async function requireAdmin() {
     if (!session) {
         return redirect(ROUTES.LOGIN)
     }
-    console.log('session.user.role,', session.user)
 
     if (session.user.role !== 'admin') {
         return redirect(ROUTES.FORBIDDEN)
