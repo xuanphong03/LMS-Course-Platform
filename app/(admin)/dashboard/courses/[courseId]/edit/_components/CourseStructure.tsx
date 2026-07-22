@@ -3,6 +3,7 @@ import type { CourseStructureItem } from '@/app/(admin)/dashboard/courses/[cours
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useState } from 'react'
 import ChapterGroup from '@/app/(admin)/dashboard/courses/[courseId]/edit/_components/ChapterGroup'
+import NewChapterModal from '@/app/(admin)/dashboard/courses/[courseId]/edit/_components/NewChapterModal'
 
 interface CourseStructureProps {
     courseId: string
@@ -18,6 +19,7 @@ export default function CourseStructure({ courseId, initialItems }: CourseStruct
         <Card>
             <CardHeader className='border-border flex flex-row items-center justify-between border-b'>
                 <CardTitle>Chapters</CardTitle>
+                <NewChapterModal courseId={courseId} />
             </CardHeader>
             <CardContent className='space-y-(--card-spacing)'>
                 <ChapterGroup
