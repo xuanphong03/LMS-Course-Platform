@@ -407,7 +407,7 @@ interface DeleteLessonProps {
 }
 
 export async function deleteLesson({ courseId, chapterId, lessonId }: DeleteLessonProps): Promise<ApiResponse> {
-    const session = await requireAdmin()
+    await requireAdmin()
     try {
         const chapterTarget = await prisma.chapter.findUnique({
             where: {
@@ -477,7 +477,7 @@ interface DeleteChapterProps {
 }
 
 export async function deleteChapter({ courseId, chapterId }: DeleteChapterProps): Promise<ApiResponse> {
-    const session = await requireAdmin()
+    await requireAdmin()
     try {
         const courseTarget = await prisma.course.findUnique({
             where: {
