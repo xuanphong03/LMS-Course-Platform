@@ -12,35 +12,48 @@ import { move } from '@dnd-kit/helpers'
 import { AutoScroller } from '@dnd-kit/dom'
 import { DragDropProvider, DragEndEvent, DragOverEvent, DragStartEvent } from '@dnd-kit/react'
 import { isSortable } from '@dnd-kit/react/sortable'
-import { useRef } from 'react'
-import type { Dispatch, SetStateAction } from 'react'
+import { useRef, useState } from 'react'
 
 interface ChapterGroupProps {
     courseId: string
-    items: CourseStructureItem[]
-    setItems: Dispatch<SetStateAction<CourseStructureItem[]>>
+    serverItems: CourseStructureItem[]
 }
 
-export default function ChapterGroup({ courseId, items, setItems }: ChapterGroupProps) {
+/**
+ * Client boundary được giới hạn tại đây vì dnd-kit và optimistic draft cần browser
+ * state. Ngoài một vòng drag/persist, serverItems luôn là nguồn dữ liệu chính xác.
+ */
+export default function ChapterGroup({ courseId, serverItems }: ChapterGroupProps) {
+    const [draftItems, setDraftItems] = useState<CourseStructureItem[] | null>(null)
+    const [closedChapters, setClosedChapters] = useState<Record<string, boolean>>({})
+    const items = draftItems ?? serverItems
     const itemsSnapshot = useRef(items)
-    const { latestItemsRef, setOptimisticItems, enqueueLessonOrder, enqueueChapterOrder, isReordering } =
-        useCourseStructureReorder({
-            courseId,
-            items,
-            setItems,
-        })
+    const {
+        latestItemsRef,
+        setOptimisticItems,
+        resetOptimisticItems,
+        persistLessonOrder,
+        persistChapterOrder,
+        isReordering,
+    } = useCourseStructureReorder({
+        courseId,
+        items,
+        serverItems,
+        setDraftItems,
+    })
 
     const handleToggleChapter = (chapterId: string) => {
-        setOptimisticItems((currentItems) =>
-            currentItems.map((chapter) =>
-                chapter.id === chapterId ? { ...chapter, isOpen: !chapter.isOpen } : chapter,
-            ),
-        )
+        // Trạng thái đóng/mở chỉ thuộc UI, không đưa vào draft thứ tự để một thao tác
+        // toggle không vô tình che các props mới do Server Component gửi xuống.
+        setClosedChapters((currentState) => ({
+            ...currentState,
+            [chapterId]: !currentState[chapterId],
+        }))
     }
 
     const handleDragStart = (event: DragStartEvent) => {
-        // Lưu trạng thái trước khi kéo để có thể khôi phục nếu người dùng hủy thao tác.
-        // Lỗi server dùng baseline trong hook vì snapshot có thể chứa optimistic state cũ.
+        // Lưu trạng thái trước khi kéo để xác định thao tác có thực sự thay đổi order.
+        // Khi hủy hoặc request lỗi, bỏ draft sẽ quay về snapshot server gần nhất.
         if (event.operation.source) {
             itemsSnapshot.current = latestItemsRef.current
         }
@@ -52,18 +65,15 @@ export default function ChapterGroup({ courseId, items, setItems }: ChapterGroup
         if (event.operation.source?.type !== 'lesson') return
 
         setOptimisticItems((currentItems) => {
-            // Chuyển cấu trúc chapter lồng nhau thành Record<groupId, lessons>
-            // để hàm move xử lý thống nhất cả đổi thứ tự và chuyển khác chapter.
             const currentLessonGroups = Object.fromEntries(
                 currentItems.map((chapter) => [getLessonGroupId(chapter.id), chapter.lessons]),
             )
             const nextLessonGroups = move(currentLessonGroups, event)
 
-            // move trả lại cùng tham chiếu khi vị trí không đổi; bỏ qua lần kết xuất thừa.
             if (nextLessonGroups === currentLessonGroups) return currentItems
 
-            // Đưa kết quả về cấu trúc state ban đầu. Array index là nguồn thứ tự duy nhất,
-            // vì vậy không lưu thêm trường order có thể bị lệch với vị trí thực tế.
+            // Array index là nguồn order duy nhất để tránh một trường position cục bộ
+            // có thể lệch khỏi cấu trúc mà dnd-kit đang hiển thị.
             const nextItems = currentItems.map((chapter) => ({
                 ...chapter,
                 lessons: nextLessonGroups[getLessonGroupId(chapter.id)],
@@ -80,7 +90,7 @@ export default function ChapterGroup({ courseId, items, setItems }: ChapterGroup
         // bản chụp trạng thái; dnd-kit tự hoàn tác phần hiển thị lạc quan của chapter.
         if (event.canceled) {
             if (source?.type === 'lesson') {
-                setOptimisticItems(itemsSnapshot.current)
+                resetOptimisticItems()
             }
 
             return
@@ -89,17 +99,19 @@ export default function ChapterGroup({ courseId, items, setItems }: ChapterGroup
         if (!isSortable(source)) return
 
         if (source.type === 'lesson') {
-            // Tạo dữ liệu gửi từ trạng thái cuối cùng sau khi thả. Mỗi lesson cần cả
-            // chapterId và position để server hỗ trợ di chuyển khác chapter.
+            // Full snapshot cần cả chapterId và position vì một lần kéo có thể thay đổi
+            // đồng thời chapter cha và thứ tự của lesson.
             const currentLessons = getLessonOrder(latestItemsRef.current)
             const hasChanged = hasLessonOrderChanged(currentLessons, itemsSnapshot.current)
 
-            // Không gọi Server Action nếu lesson được thả lại vị trí ban đầu.
-            if (!hasChanged) return
+            if (!hasChanged) {
+                resetOptimisticItems()
+                return
+            }
 
-            // Chỉ xếp yêu cầu lưu tại đây. Effect sẽ gọi Server Action sau khi React
-            // commit trạng thái thả, tránh giữ lifecycle drop chờ network hoàn tất.
-            enqueueLessonOrder(currentLessons)
+            // Transition không block handler nên dnd-kit vẫn hoàn tất drop ngay,
+            // còn isReordering sẽ khóa lần kéo tiếp theo đến khi server phản hồi.
+            persistLessonOrder(currentLessons)
 
             return
         }
@@ -123,9 +135,7 @@ export default function ChapterGroup({ courseId, items, setItems }: ChapterGroup
 
             setOptimisticItems(reorderedItems)
 
-            // Tách việc lưu khỏi onDragEnd để giao diện hoàn tất drop trước khi action
-            // và revalidation bắt đầu chạy.
-            enqueueChapterOrder(chapters)
+            persistChapterOrder(chapters)
 
             return
         }
@@ -152,6 +162,7 @@ export default function ChapterGroup({ courseId, items, setItems }: ChapterGroup
                     courseId={courseId}
                     chapter={chapter}
                     index={index}
+                    isOpen={!closedChapters[chapter.id]}
                     isDragDisabled={isReordering}
                     onToggle={handleToggleChapter}
                 />

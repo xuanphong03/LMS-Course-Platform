@@ -15,6 +15,7 @@ import type { ReorderChaptersInput, ReorderLessonsInput } from '@/schemas/course
 import { request } from '@arcjet/next'
 import { revalidatePath } from 'next/cache'
 import { chapterSchema, ChapterSchemaType } from '@/schemas/chapter-form.schema'
+import { lessonSchema, LessonSchemaType } from '@/schemas/lesson-form.schema'
 
 const aj = arcjet
     .withRule(
@@ -31,6 +32,12 @@ const aj = arcjet
         }),
     )
 
+/**
+ * Cập nhật thông tin course thuộc admin hiện tại.
+ *
+ * Luồng: Xác thực admin → Áp dụng bot/rate-limit protection → Validate dữ liệu
+ * → Cập nhật đúng course thuộc quyền sở hữu.
+ */
 export async function editCourse(data: CourseFormDataType, courseId: string): Promise<ApiResponse> {
     const session = await requireAdmin()
 
@@ -80,6 +87,12 @@ export async function editCourse(data: CourseFormDataType, courseId: string): Pr
     }
 }
 
+/**
+ * Lưu full snapshot vị trí và chapter đích của toàn bộ lesson trong course.
+ *
+ * Luồng: Validate shape → Xác thực quyền sở hữu → Đối chiếu identity trong database
+ * → Ghi nguyên tử → Revalidate trang chỉnh sửa.
+ */
 export async function reorderLessons(input: ReorderLessonsInput): Promise<ApiResponse> {
     const session = await requireAdmin()
 
@@ -158,6 +171,12 @@ export async function reorderLessons(input: ReorderLessonsInput): Promise<ApiRes
     }
 }
 
+/**
+ * Lưu full snapshot thứ tự chapter của course.
+ *
+ * Luồng: Validate shape → Xác thực quyền sở hữu → Đối chiếu identity trong database
+ * → Ghi nguyên tử → Revalidate trang chỉnh sửa.
+ */
 export async function reorderChapters(input: ReorderChaptersInput): Promise<ApiResponse> {
     const session = await requireAdmin()
 
@@ -202,7 +221,7 @@ export async function reorderChapters(input: ReorderChaptersInput): Promise<ApiR
             }
         }
 
-        // Cập nhật mọi position trong cùng transaction để không lưu thứ tự dở dang.
+        // Một lỗi update phải rollback toàn bộ để database không lưu order nửa cũ nửa mới.
         const updates = chapters.map((chapter) =>
             prisma.chapter.update({
                 where: {
@@ -231,15 +250,39 @@ export async function reorderChapters(input: ReorderChaptersInput): Promise<ApiR
     }
 }
 
+/**
+ * Tạo chapter ở cuối course thuộc admin hiện tại.
+ *
+ * Luồng: Validate dữ liệu → Xác thực quyền sở hữu course → Tính position kế tiếp
+ * → Tạo chapter → Revalidate trang chỉnh sửa.
+ */
 export async function createChapter(values: ChapterSchemaType): Promise<ApiResponse> {
-    await requireAdmin()
+    const session = await requireAdmin()
 
     try {
         const result = chapterSchema.safeParse(values)
+
         if (!result.success) {
             return {
                 status: 'error',
                 message: 'Invalid data',
+            }
+        }
+
+        const course = await prisma.course.findFirst({
+            where: {
+                id: result.data.courseId,
+                userId: session.user.id,
+            },
+            select: {
+                id: true,
+            },
+        })
+
+        if (!course) {
+            return {
+                status: 'error',
+                message: 'Course not found',
             }
         }
 
@@ -260,7 +303,7 @@ export async function createChapter(values: ChapterSchemaType): Promise<ApiRespo
                 data: {
                     title: result.data.name,
                     courseId: result.data.courseId,
-                    position: maxPosition?.position ?? 0,
+                    position: (maxPosition?.position ?? -1) + 1,
                 },
             })
         })
@@ -274,7 +317,225 @@ export async function createChapter(values: ChapterSchemaType): Promise<ApiRespo
     } catch {
         return {
             status: 'error',
-            message: 'Failed to reorder chapters',
+            message: 'Failed to create chapter',
+        }
+    }
+}
+
+/**
+ * Tạo lesson ở cuối chapter thuộc course của admin hiện tại.
+ *
+ * Luồng: Validate dữ liệu → Xác thực quan hệ course/chapter và quyền sở hữu
+ * → Tính position kế tiếp → Tạo lesson → Revalidate trang chỉnh sửa.
+ */
+export async function createLesson(values: LessonSchemaType): Promise<ApiResponse> {
+    const session = await requireAdmin()
+
+    try {
+        const result = lessonSchema.safeParse(values)
+
+        if (!result.success) {
+            return {
+                status: 'error',
+                message: 'Invalid data',
+            }
+        }
+
+        const chapter = await prisma.chapter.findFirst({
+            where: {
+                id: result.data.chapterId,
+                course: {
+                    id: result.data.courseId,
+                    userId: session.user.id,
+                },
+            },
+            select: {
+                id: true,
+            },
+        })
+
+        if (!chapter) {
+            return {
+                status: 'error',
+                message: 'Chapter not found',
+            }
+        }
+
+        await prisma.$transaction(async (tx) => {
+            const maxPosition = await tx.lesson.findFirst({
+                where: {
+                    chapterId: result.data.chapterId,
+                },
+                select: {
+                    position: true,
+                },
+                orderBy: {
+                    position: 'desc',
+                },
+            })
+
+            await tx.lesson.create({
+                data: {
+                    title: result.data.name,
+                    description: result.data.description,
+                    thumbnailKey: result.data.thumbnailKey,
+                    videoKey: result.data.videoKey,
+                    chapterId: result.data.chapterId,
+                    position: (maxPosition?.position ?? -1) + 1,
+                },
+            })
+        })
+
+        revalidatePath(ROUTES.DASHBOARD_COURSES_EDIT(result.data.courseId))
+
+        return {
+            status: 'success',
+            message: 'Lesson created successfully',
+        }
+    } catch {
+        return {
+            status: 'error',
+            message: 'Failed to create lesson',
+        }
+    }
+}
+
+interface DeleteLessonProps {
+    courseId: string
+    chapterId: string
+    lessonId: string
+}
+
+export async function deleteLesson({ courseId, chapterId, lessonId }: DeleteLessonProps): Promise<ApiResponse> {
+    const session = await requireAdmin()
+    try {
+        const chapterTarget = await prisma.chapter.findUnique({
+            where: {
+                id: chapterId,
+            },
+            select: {
+                lessons: {
+                    orderBy: {
+                        position: 'asc',
+                    },
+                    select: {
+                        id: true,
+                        position: true,
+                    },
+                },
+            },
+        })
+        if (!chapterTarget) {
+            return {
+                status: 'error',
+                message: 'Chapter not found',
+            }
+        }
+
+        const lessonTarget = chapterTarget.lessons.find((lesson) => lesson.id === lessonId)
+        if (!lessonTarget) {
+            return {
+                status: 'error',
+                message: 'Lesson not found',
+            }
+        }
+
+        const remainingLessons = chapterTarget.lessons.filter((lesson) => lesson.id !== lessonId)
+        const updates = remainingLessons.map((lesson, index) => {
+            return prisma.lesson.update({
+                where: { id: lesson.id },
+                data: { position: index },
+            })
+        })
+        await prisma.$transaction([
+            ...updates,
+            prisma.lesson.delete({
+                where: {
+                    id: lessonId,
+                    chapterId: chapterId,
+                },
+            }),
+        ])
+
+        revalidatePath(ROUTES.DASHBOARD_COURSES_EDIT(courseId))
+
+        return {
+            status: 'success',
+            message: 'Lesson deleted and positions reordered successfully',
+        }
+    } catch {
+        return {
+            status: 'error',
+            message: 'Failed to delete lesson',
+        }
+    }
+}
+
+interface DeleteChapterProps {
+    courseId: string
+    chapterId: string
+}
+
+export async function deleteChapter({ courseId, chapterId }: DeleteChapterProps): Promise<ApiResponse> {
+    const session = await requireAdmin()
+    try {
+        const courseTarget = await prisma.course.findUnique({
+            where: {
+                id: courseId,
+            },
+            select: {
+                chapters: {
+                    orderBy: {
+                        position: 'asc',
+                    },
+                    select: {
+                        id: true,
+                        position: true,
+                    },
+                },
+            },
+        })
+        if (!courseTarget) {
+            return {
+                status: 'error',
+                message: 'Course not found',
+            }
+        }
+
+        const chapterTarget = courseTarget.chapters.find((chapter) => chapter.id === chapterId)
+        if (!chapterTarget) {
+            return {
+                status: 'error',
+                message: 'Chapter not found',
+            }
+        }
+
+        const remainingChapters = courseTarget.chapters.filter((chapter) => chapter.id !== chapterId)
+        const updates = remainingChapters.map((chapter, index) => {
+            return prisma.chapter.update({
+                where: { id: chapter.id },
+                data: { position: index },
+            })
+        })
+        await prisma.$transaction([
+            ...updates,
+            prisma.chapter.delete({
+                where: {
+                    id: chapterId,
+                },
+            }),
+        ])
+
+        revalidatePath(ROUTES.DASHBOARD_COURSES_EDIT(courseId))
+
+        return {
+            status: 'success',
+            message: 'Chapter deleted and positions reordered successfully',
+        }
+    } catch {
+        return {
+            status: 'error',
+            message: 'Failed to delete chapter',
         }
     }
 }

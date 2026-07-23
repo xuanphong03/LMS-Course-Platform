@@ -1,12 +1,12 @@
-'use client'
 import type { CourseStructureItem } from '@/app/(admin)/dashboard/courses/[courseId]/edit/_components/course-structure/course-structure.types'
 import { getLessonGroupId } from '@/app/(admin)/dashboard/courses/[courseId]/edit/_components/course-structure/course-structure.utils'
+import DeleteLesson from '@/app/(admin)/dashboard/courses/[courseId]/edit/_components/DeleteLesson'
 import SortableItem from '@/app/(admin)/dashboard/courses/[courseId]/edit/_components/SortableItem'
 import { Button } from '@/components/ui/button'
 import { ROUTES } from '@/consts/routes'
 import { CollisionPriority } from '@dnd-kit/abstract'
 import { useDroppable } from '@dnd-kit/react'
-import { FileTextIcon, GripVerticalIcon, TrashIcon } from 'lucide-react'
+import { FileTextIcon, GripVerticalIcon } from 'lucide-react'
 import Link from 'next/link'
 
 interface LessonGroupProps {
@@ -15,6 +15,10 @@ interface LessonGroupProps {
     isDragDisabled: boolean
 }
 
+/**
+ * Đặt droppable list trong client graph của ChapterGroup vì dnd-kit cần browser
+ * state; file không tự mở thêm một client boundary độc lập.
+ */
 export default function LessonGroup({ courseId, chapter, isDragDisabled }: LessonGroupProps) {
     const groupId = getLessonGroupId(chapter.id)
     const { ref } = useDroppable({
@@ -61,13 +65,11 @@ export default function LessonGroup({ courseId, chapter, isDragDisabled }: Lesso
                                     {lessonItem.title}
                                 </Link>
                             </div>
-                            <Button
-                                type='button'
-                                size='icon'
-                                variant='outline'
-                            >
-                                <TrashIcon className='size-4' />
-                            </Button>
+                            <DeleteLesson
+                                courseId={courseId}
+                                chapterId={chapter.id}
+                                lessonId={lessonItem.id}
+                            />
                         </div>
                     )}
                 </SortableItem>

@@ -7,6 +7,10 @@ interface iAppProps {
     params: Params
 }
 
+/**
+ * Nạp course một lần ở Server Component để hai tab dùng chung cùng một snapshot dữ liệu,
+ * tránh tạo thêm luồng fetch và trạng thái đồng bộ ở phía client.
+ */
 export default async function EditCoursePage({ params }: iAppProps) {
     const { courseId } = await params
     const data = await adminGetCourse(courseId)

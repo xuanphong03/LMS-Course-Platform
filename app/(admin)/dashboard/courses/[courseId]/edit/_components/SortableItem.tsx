@@ -1,5 +1,3 @@
-'use client'
-
 import { closestCorners } from '@dnd-kit/collision'
 import { useSortable } from '@dnd-kit/react/sortable'
 import type { ReactNode, Ref } from 'react'
@@ -17,6 +15,11 @@ interface SortItemProps {
     }
     children: (props: { handleRef: Ref<HTMLButtonElement> }) => ReactNode
 }
+
+/**
+ * Chuẩn hóa cấu hình sortable dùng chung để chapter và lesson có cùng collision,
+ * transition và cơ chế khóa drag trên cả pointer lẫn keyboard sensor.
+ */
 export default function SortableItem({
     id,
     index,

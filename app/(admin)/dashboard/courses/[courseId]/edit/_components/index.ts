@@ -1,8 +1,6 @@
 import ContentBasicInfo from '@/app/(admin)/dashboard/courses/[courseId]/edit/_components/ContentBasicInfo'
 import ContentCourseStructure from '@/app/(admin)/dashboard/courses/[courseId]/edit/_components/ContentCourseStructure'
-import SortableItem from '@/app/(admin)/dashboard/courses/[courseId]/edit/_components/SortableItem'
-import LessonGroup from '@/app/(admin)/dashboard/courses/[courseId]/edit/_components/LessonGroup'
-import ChapterGroup from '@/app/(admin)/dashboard/courses/[courseId]/edit/_components/ChapterGroup'
-import CourseStructure from '@/app/(admin)/dashboard/courses/[courseId]/edit/_components/CourseStructure'
 
-export { ContentBasicInfo, ContentCourseStructure, SortableItem, LessonGroup, ChapterGroup, CourseStructure }
+// Barrel phía server chỉ export các entry point mà page sử dụng. Các module DnD
+// được import bên dưới client boundary để không vô tình mở rộng client graph.
+export { ContentBasicInfo, ContentCourseStructure }

@@ -1,29 +1,31 @@
-'use client'
-
 import LessonGroup from '@/app/(admin)/dashboard/courses/[courseId]/edit/_components/LessonGroup'
 import SortableItem from '@/app/(admin)/dashboard/courses/[courseId]/edit/_components/SortableItem'
 import type { CourseStructureItem } from './course-structure.types'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
-import { ChevronDownIcon, ChevronUpIcon, GripVerticalIcon, TrashIcon } from 'lucide-react'
+import { ChevronDownIcon, ChevronUpIcon, GripVerticalIcon } from 'lucide-react'
+import NewLessonModal from '@/app/(admin)/dashboard/courses/[courseId]/edit/_components/NewLessonModal'
+import DeleteChapter from '@/app/(admin)/dashboard/courses/[courseId]/edit/_components/DeleteChapter'
 
 interface CourseStructureChapterProps {
     courseId: string
     chapter: CourseStructureItem
     index: number
+    isOpen: boolean
     isDragDisabled: boolean
     onToggle: (chapterId: string) => void
 }
 
 /**
- * Render một sortable chapter và toàn bộ lesson bên trong.
- * Component này chỉ phụ trách presentation; state và persistence nằm ở ChapterGroup.
+ * Tách presentation của một chapter khỏi DnD lifecycle để state và persistence chỉ
+ * có một nơi quản lý trong ChapterGroup; component này không mở client boundary riêng.
  */
 export function CourseStructureChapter({
     courseId,
     chapter,
     index,
+    isOpen,
     isDragDisabled,
     onToggle,
 }: CourseStructureChapterProps) {
@@ -39,7 +41,7 @@ export function CourseStructureChapter({
             {({ handleRef }) => (
                 <Card>
                     <Collapsible
-                        open={chapter.isOpen}
+                        open={isOpen}
                         onOpenChange={() => onToggle(chapter.id)}
                     >
                         <div className='border-border flex items-center justify-between border-b p-3'>
@@ -63,7 +65,7 @@ export function CourseStructureChapter({
                                         />
                                     }
                                 >
-                                    {chapter.isOpen ? (
+                                    {isOpen ? (
                                         <ChevronDownIcon className='size-4' />
                                     ) : (
                                         <ChevronUpIcon className='size-4' />
@@ -71,12 +73,10 @@ export function CourseStructureChapter({
                                 </CollapsibleTrigger>
                                 <p className='hover:text-primary cursor-pointer pl-2'>{chapter.title}</p>
                             </div>
-                            <Button
-                                type='button'
-                                variant='outline'
-                            >
-                                <TrashIcon className='size-4' />
-                            </Button>
+                            <DeleteChapter
+                                courseId={courseId}
+                                chapterId={chapter.id}
+                            />
                         </div>
                         <CollapsibleContent>
                             <div className='p-1'>
@@ -86,13 +86,10 @@ export function CourseStructureChapter({
                                     isDragDisabled={isDragDisabled}
                                 />
                                 <div className='p-2'>
-                                    <Button
-                                        type='button'
-                                        variant='outline'
-                                        className='w-full'
-                                    >
-                                        Create new lesson
-                                    </Button>
+                                    <NewLessonModal
+                                        courseId={courseId}
+                                        chapterId={chapter.id}
+                                    />
                                 </div>
                             </div>
                         </CollapsibleContent>

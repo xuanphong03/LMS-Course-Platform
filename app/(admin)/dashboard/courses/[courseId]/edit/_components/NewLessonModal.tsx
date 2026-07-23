@@ -1,5 +1,4 @@
-'use client'
-import { createChapter } from '@/app/(admin)/dashboard/courses/[courseId]/edit/actions'
+import { createLesson } from '@/app/(admin)/dashboard/courses/[courseId]/edit/actions'
 import RHFInputField from '@/components/forms/RHFInputField'
 import { Button } from '@/components/ui/button'
 import {
@@ -12,36 +11,41 @@ import {
     DialogTrigger,
 } from '@/components/ui/dialog'
 import { tryCatch } from '@/hooks/try-catch'
-import { chapterSchema, ChapterSchemaType } from '@/schemas/chapter-form.schema'
+import { lessonSchema, LessonSchemaType } from '@/schemas/lesson-form.schema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { LoaderIcon, PlusIcon } from 'lucide-react'
 import { useState, useTransition } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 
-interface NewChapterModalProps {
+interface NewLessonModalProps {
     courseId: string
+    chapterId: string
 }
 
 /**
- * Client island độc lập cho dialog và form state; Server Action chịu trách nhiệm
- * mutation và trả RSC payload mới nên component không tự quản lý danh sách chapter.
+ * Quản lý dialog/form tạo lesson bên trong client graph của ChapterGroup.
+ * Danh sách lesson vẫn lấy từ RSC snapshot để tránh duy trì thêm local collection.
  */
-export default function NewChapterModal({ courseId }: NewChapterModalProps) {
+export default function NewLessonModal({ courseId, chapterId }: NewLessonModalProps) {
     const [isOpen, setIsOpen] = useState(false)
     const [pending, startTransition] = useTransition()
 
-    const form = useForm<ChapterSchemaType>({
-        resolver: zodResolver(chapterSchema),
+    const form = useForm<LessonSchemaType>({
+        resolver: zodResolver(lessonSchema),
         defaultValues: {
             name: '',
             courseId: courseId,
+            chapterId: chapterId,
+            description: '',
+            thumbnailKey: '',
+            videoKey: '',
         },
     })
 
-    const handleSubmitForm = (values: ChapterSchemaType) => {
+    const handleSubmitForm = (values: LessonSchemaType) => {
         startTransition(async () => {
-            const { data: result, error } = await tryCatch(createChapter(values))
+            const { data: result, error } = await tryCatch(createLesson(values))
 
             if (error) {
                 toast.error('An unexpected error occurred. Please try again.')
@@ -66,20 +70,19 @@ export default function NewChapterModal({ courseId }: NewChapterModalProps) {
             <DialogTrigger
                 render={
                     <Button
-                        size='sm'
                         type='button'
                         variant='outline'
-                        className='gap-2'
+                        className='w-full gap-2'
                     >
-                        <PlusIcon className='size-4' /> <span>New Chapter</span>
+                        <PlusIcon className='size-4' /> <span>New Lesson</span>
                     </Button>
                 }
             />
 
             <DialogContent className='sm:max-w-md'>
                 <DialogHeader>
-                    <DialogTitle>Create new chapter</DialogTitle>
-                    <DialogDescription>What would you like to name your chapter?</DialogDescription>
+                    <DialogTitle>Create new lesson</DialogTitle>
+                    <DialogDescription>What would you like to name your lesson?</DialogDescription>
                 </DialogHeader>
 
                 <form
@@ -91,7 +94,7 @@ export default function NewChapterModal({ courseId }: NewChapterModalProps) {
                         id='name'
                         name='name'
                         label='Name'
-                        placeholder='Enter chapter name...'
+                        placeholder='Enter lesson name...'
                         control={form.control}
                     />
 
@@ -102,10 +105,10 @@ export default function NewChapterModal({ courseId }: NewChapterModalProps) {
                         >
                             {pending ? (
                                 <>
-                                    <span>Creating new chapter...</span> <LoaderIcon className='size-4 animate-spin' />
+                                    <span>Creating new lesson...</span> <LoaderIcon className='size-4 animate-spin' />
                                 </>
                             ) : (
-                                <span>Create new chapter</span>
+                                <span>Create new lesson</span>
                             )}
                         </Button>
                     </DialogFooter>

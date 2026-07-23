@@ -27,6 +27,10 @@ import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { AdminCourseSingularType } from '@/app/data/admin/admin-get-course'
 
+/**
+ * Đây là Client Component vì biểu mẫu cần React Hook Form, editor và uploader tương tác với trình duyệt.
+ * Việc ghi dữ liệu vẫn thuộc Server Action để không đẩy logic nghiệp vụ và quyền truy cập xuống client.
+ */
 export default function EditCourseForm({ data }: { data: AdminCourseSingularType }) {
     const router = useRouter()
     const [pending, startTransition] = useTransition()

@@ -1,6 +1,5 @@
 import z from 'zod/v3'
 
-/** Một lesson trong full snapshot dùng để lưu lại thứ tự của course. */
 const reorderLessonInputSchema = z
     .object({
         id: z.string().min(1),
@@ -9,7 +8,6 @@ const reorderLessonInputSchema = z
     })
     .strict()
 
-/** Một chapter trong full snapshot dùng để lưu lại thứ tự của course. */
 const reorderChapterInputSchema = z
     .object({
         id: z.string().min(1),
@@ -17,7 +15,6 @@ const reorderChapterInputSchema = z
     })
     .strict()
 
-/** Kiểm tra shape dữ liệu đầu vào của Server Action reorder lesson. */
 export const reorderLessonsSchema = z
     .object({
         courseId: z.string().min(1),
@@ -25,7 +22,6 @@ export const reorderLessonsSchema = z
     })
     .strict()
 
-/** Kiểm tra shape dữ liệu đầu vào của Server Action reorder chapter. */
 export const reorderChaptersSchema = z
     .object({
         courseId: z.string().min(1),

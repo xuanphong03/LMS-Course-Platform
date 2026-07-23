@@ -3,13 +3,14 @@ import type { CourseStructureItem } from '@/app/(admin)/dashboard/courses/[cours
 import type { AdminCourseSingularType } from '@/app/data/admin/admin-get-course'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
+/**
+ * Giữ bước chuyển Prisma result thành view model ở phía server để client boundary
+ * chỉ nhận dữ liệu cần cho DnD, thay vì phụ thuộc vào toàn bộ course model.
+ */
 export default function ContentCourseStructure({ data }: { data: AdminCourseSingularType }) {
-    // Chỉ chuyển dữ liệu cần thiết qua Client Component boundary để giảm RSC payload
-    // và không làm UI kéo thả phụ thuộc vào toàn bộ model của trang chỉnh sửa course.
     const initialItems: CourseStructureItem[] = data.chapters.map((chapter) => ({
         id: chapter.id,
         title: chapter.title,
-        isOpen: true,
         lessons: chapter.lessons.map((lesson) => ({
             id: lesson.id,
             title: lesson.title,
@@ -24,7 +25,6 @@ export default function ContentCourseStructure({ data }: { data: AdminCourseSing
             </CardHeader>
             <CardContent>
                 <CourseStructure
-                    key={data.id}
                     courseId={data.id}
                     initialItems={initialItems}
                 />
