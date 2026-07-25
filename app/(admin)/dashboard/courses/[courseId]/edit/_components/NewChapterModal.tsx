@@ -61,7 +61,12 @@ export default function NewChapterModal({ courseId }: NewChapterModalProps) {
     return (
         <Dialog
             open={isOpen}
-            onOpenChange={setIsOpen}
+            onOpenChange={(open) => {
+                if (!open) {
+                    form.reset()
+                }
+                setIsOpen(open)
+            }}
         >
             <DialogTrigger
                 render={

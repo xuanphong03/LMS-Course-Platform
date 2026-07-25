@@ -65,7 +65,12 @@ export default function NewLessonModal({ courseId, chapterId }: NewLessonModalPr
     return (
         <Dialog
             open={isOpen}
-            onOpenChange={setIsOpen}
+            onOpenChange={(open) => {
+                if (!open) {
+                    form.reset()
+                }
+                setIsOpen(open)
+            }}
         >
             <DialogTrigger
                 render={

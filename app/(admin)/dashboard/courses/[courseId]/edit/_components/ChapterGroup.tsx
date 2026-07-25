@@ -109,8 +109,8 @@ export default function ChapterGroup({ courseId, serverItems }: ChapterGroupProp
                 return
             }
 
-            // Transition không block handler nên dnd-kit vẫn hoàn tất drop ngay,
-            // còn isReordering sẽ khóa lần kéo tiếp theo đến khi server phản hồi.
+            // Chỉ xếp request sau khi draft đã được cập nhật; hook sẽ bắt đầu
+            // Server Action sau commit và khóa lần kéo tiếp theo đến khi hoàn tất.
             persistLessonOrder(currentLessons)
 
             return
@@ -119,22 +119,14 @@ export default function ChapterGroup({ courseId, serverItems }: ChapterGroupProp
         const { initialIndex, index } = source
 
         if (source.type === 'chapter') {
-            // Chapter là một danh sách phẳng nên chỉ cần cập nhật trạng thái khi thả,
-            // thay vì kết xuất lại liên tục trong onDragOver như lesson.
             if (initialIndex === index) return
 
-            const nextItems = [...latestItemsRef.current]
-            const [movedChapter] = nextItems.splice(initialIndex, 1)
-
-            if (!movedChapter) return
-
-            nextItems.splice(index, 0, movedChapter)
-
-            const reorderedItems = nextItems
+            const reorderedItems = move(latestItemsRef.current, event)
             const chapters = getChapterOrder(reorderedItems)
 
+            // Chốt draft ngay trong lifecycle drop để item về đúng vị trí. Request
+            // chỉ được xếp hàng ở đây và sẽ chạy sau khi commit này hoàn tất.
             setOptimisticItems(reorderedItems)
-
             persistChapterOrder(chapters)
 
             return
