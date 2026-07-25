@@ -16,6 +16,7 @@ interface RHFFileUploaderProps<T extends FieldValues> {
     classNameFieldLabel?: string
     classNameFieldError?: string
     classNameFieldDescription?: string
+    fileType?: 'image' | 'video'
 }
 export default function RHFFileUploader<T extends FieldValues>({
     id,
@@ -28,6 +29,7 @@ export default function RHFFileUploader<T extends FieldValues>({
     classNameFieldLabel,
     classNameFieldError,
     classNameFieldDescription,
+    fileType,
 }: RHFFileUploaderProps<T>) {
     return (
         <Controller
@@ -53,6 +55,7 @@ export default function RHFFileUploader<T extends FieldValues>({
                         id={id}
                         value={field.value}
                         onChange={field.onChange}
+                        fileTypeAccepted={fileType ?? 'image'}
                     />
                     {description && (
                         <FieldDescription className={classNameFieldDescription}>{description}</FieldDescription>

@@ -30,8 +30,9 @@ interface UploaderProps {
     id: string
     value?: string
     onChange?: (value: string) => void
+    fileTypeAccepted: 'image' | 'video'
 }
-export default function Uploader({ id, value, onChange }: UploaderProps) {
+export default function Uploader({ id, value, onChange, fileTypeAccepted = 'image' }: UploaderProps) {
     const fileUrl = useConstruct(value || '')
     const [fileState, setFileState] = useState<UploaderState>({
         error: false,
@@ -40,98 +41,103 @@ export default function Uploader({ id, value, onChange }: UploaderProps) {
         uploading: false,
         progress: 0,
         isDeleting: false,
-        fileType: 'image',
+        fileType: fileTypeAccepted,
         key: value,
-        objectUrl: fileUrl,
+        objectUrl: value ? fileUrl : undefined,
     })
 
-    const handleUploadFile = async (file: File) => {
-        try {
-            setFileState((prevState) => ({
-                ...prevState,
-                uploading: true,
-                progress: 0,
-            }))
-            // 1. Get presigned URL
-            const presignedResponse = await fetch(ENDPOINTS.UPLOAD_FILE_S3, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    fileName: file.name,
-                    contentType: file.type,
-                    size: file.size,
-                    isImage: true,
-                }),
-            })
-
-            if (!presignedResponse.ok) {
-                const errorResponse = (await presignedResponse.json().catch(() => null)) as { message?: string } | null
-                toast.error(errorResponse?.message ?? 'Failed to get presigned URL')
+    const handleUploadFile = useCallback(
+        async (file: File) => {
+            try {
                 setFileState((prevState) => ({
                     ...prevState,
-                    uploading: false,
+                    uploading: true,
+                    progress: 0,
+                }))
+                // 1. Get presigned URL
+                const presignedResponse = await fetch(ENDPOINTS.UPLOAD_FILE_S3, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        fileName: file.name,
+                        contentType: file.type,
+                        size: file.size,
+                        isImage: fileTypeAccepted === 'image',
+                    }),
+                })
+
+                if (!presignedResponse.ok) {
+                    const errorResponse = (await presignedResponse.json().catch(() => null)) as {
+                        message?: string
+                    } | null
+                    toast.error(errorResponse?.message ?? 'Failed to get presigned URL')
+                    setFileState((prevState) => ({
+                        ...prevState,
+                        uploading: false,
+                        progress: 0,
+                        error: true,
+                        objectUrl: undefined,
+                    }))
+
+                    if (fileState.objectUrl && !fileState.objectUrl.startsWith('http')) {
+                        URL.revokeObjectURL(fileState.objectUrl)
+                    }
+
+                    return
+                }
+
+                const { presignedUrl, key } = (await presignedResponse.json()) as { presignedUrl: string; key: string }
+
+                await new Promise<void>((resolve, reject) => {
+                    const xhr = new XMLHttpRequest()
+                    xhr.upload.onprogress = (event) => {
+                        if (event.lengthComputable) {
+                            const percentageCompleted = (event.loaded / event.total) * 100
+                            setFileState((prevState) => ({
+                                ...prevState,
+                                progress: Math.round(percentageCompleted),
+                            }))
+                        }
+                    }
+                    xhr.onload = () => {
+                        if (xhr.status === 200 || xhr.status == 204) {
+                            setFileState((prevState) => ({
+                                ...prevState,
+                                progress: 100,
+                                uploading: false,
+                                key: key,
+                            }))
+                            onChange?.(key)
+                            toast.success('File uploaded successfully 🎉')
+                            resolve()
+                        } else {
+                            reject(new Error(`Upload failed with status ${xhr.status}`))
+                        }
+                    }
+                    xhr.onerror = () => {
+                        reject(new Error('Upload failed. Check Tigris CORS settings for PUT and Content-Type.'))
+                    }
+                    xhr.open('PUT', presignedUrl)
+                    xhr.setRequestHeader('Content-Type', file.type)
+                    xhr.send(file)
+                })
+            } catch (error) {
+                toast.error(error instanceof Error ? error.message : 'Something went wrong')
+                setFileState((prevState) => ({
+                    ...prevState,
                     progress: 0,
                     error: true,
+                    uploading: false,
                     objectUrl: undefined,
                 }))
 
                 if (fileState.objectUrl && !fileState.objectUrl.startsWith('http')) {
                     URL.revokeObjectURL(fileState.objectUrl)
                 }
-
-                return
             }
-
-            const { presignedUrl, key } = (await presignedResponse.json()) as { presignedUrl: string; key: string }
-
-            await new Promise<void>((resolve, reject) => {
-                const xhr = new XMLHttpRequest()
-                xhr.upload.onprogress = (event) => {
-                    if (event.lengthComputable) {
-                        const percentageCompleted = (event.loaded / event.total) * 100
-                        setFileState((prevState) => ({
-                            ...prevState,
-                            progress: Math.round(percentageCompleted),
-                        }))
-                    }
-                }
-                xhr.onload = () => {
-                    if (xhr.status === 200 || xhr.status == 204) {
-                        setFileState((prevState) => ({
-                            ...prevState,
-                            progress: 100,
-                            uploading: false,
-                            key: key,
-                        }))
-                        onChange?.(key)
-                        toast.success('File uploaded successfully 🎉')
-                        resolve()
-                    } else {
-                        reject(new Error(`Upload failed with status ${xhr.status}`))
-                    }
-                }
-                xhr.onerror = () => {
-                    reject(new Error('Upload failed. Check Tigris CORS settings for PUT and Content-Type.'))
-                }
-                xhr.open('PUT', presignedUrl)
-                xhr.setRequestHeader('Content-Type', file.type)
-                xhr.send(file)
-            })
-        } catch (error) {
-            toast.error(error instanceof Error ? error.message : 'Something went wrong')
-            setFileState((prevState) => ({
-                ...prevState,
-                progress: 0,
-                error: true,
-                uploading: false,
-                objectUrl: undefined,
-            }))
-
-            if (fileState.objectUrl && !fileState.objectUrl.startsWith('http')) {
-                URL.revokeObjectURL(fileState.objectUrl)
-            }
-        }
-    }
+        },
+        [fileState.objectUrl, fileTypeAccepted, onChange],
+    )
 
     const handleOnDrop = useCallback(
         (acceptedFiles: File[]) => {
@@ -151,13 +157,12 @@ export default function Uploader({ id, value, onChange }: UploaderProps) {
                 error: false,
                 id: uuidv4(),
                 isDeleting: false,
-                fileType: 'image',
+                fileType: fileTypeAccepted,
             }))
 
             handleUploadFile(file)
         },
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        [fileState.objectUrl],
+        [fileState.objectUrl, fileTypeAccepted, handleUploadFile],
     )
 
     const handleOnDropRejected = useCallback((fileRejections: FileRejection[]) => {
@@ -213,7 +218,7 @@ export default function Uploader({ id, value, onChange }: UploaderProps) {
                 progress: 0,
                 objectUrl: undefined,
                 error: false,
-                fileType: 'image',
+                fileType: fileTypeAccepted,
                 id: null,
                 isDeleting: false,
             }))
@@ -247,6 +252,7 @@ export default function Uploader({ id, value, onChange }: UploaderProps) {
                     previewUrl={fileState.objectUrl}
                     isDeleting={fileState.isDeleting}
                     onRemoveFile={handleRemoveFile}
+                    fileType={fileState.fileType}
                 />
             )
         }
@@ -256,10 +262,10 @@ export default function Uploader({ id, value, onChange }: UploaderProps) {
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop: (acceptedFiles) => handleOnDrop(acceptedFiles),
         onDropRejected: handleOnDropRejected,
-        accept: { 'image/*': [] },
+        accept: fileTypeAccepted === 'image' ? { 'image/*': [] } : { 'video/*': [] },
         maxFiles: 1,
         multiple: false,
-        maxSize: 1024 * 1024, // 1 Mb calculation
+        maxSize: fileTypeAccepted === 'image' ? 1024 * 1024 : 5 * 1024 * 1024, // 1Mb calculation with image and 5Mb with video
         disabled: fileState.uploading || !!fileState.objectUrl,
     })
 
