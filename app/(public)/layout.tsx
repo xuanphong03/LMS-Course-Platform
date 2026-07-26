@@ -9,7 +9,7 @@ export default function PublicLayout({
     return (
         <>
             <Header />
-            <main className='relative mx-auto max-w-350'>{children}</main>
+            {children}
             <Footer />
         </>
     )

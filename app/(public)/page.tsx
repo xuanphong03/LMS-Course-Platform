@@ -10,9 +10,9 @@ export const metadata: Metadata = {
 
 export default function Home() {
     return (
-        <div className='py-8'>
+        <main className='relative min-h-screen space-y-20 pt-20'>
             <HeroSection />
             <FeaturesSection />
-        </div>
+        </main>
     )
 }

@@ -35,21 +35,25 @@ const features: FeatureProps[] = [
 
 export default function FeaturesSection() {
     return (
-        <section className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4'>
-            {features?.map((feature, index) => (
-                <Card
-                    key={index}
-                    className='transition-shadow hover:shadow-lg'
-                >
-                    <CardHeader>
-                        <div className='mb-4 text-4xl'>{feature.icon}</div>
-                        <CardTitle>{feature.title}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className='text-muted-foreground'>{feature.description}</p>
-                    </CardContent>
-                </Card>
-            ))}
+        <section className='relative'>
+            <div className='mx-auto max-w-340'>
+                <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4'>
+                    {features?.map((feature, index) => (
+                        <Card
+                            key={index}
+                            className='transition-shadow hover:shadow-lg'
+                        >
+                            <CardHeader>
+                                <div className='mb-4 text-4xl'>{feature.icon}</div>
+                                <CardTitle>{feature.title}</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <p className='text-muted-foreground'>{feature.description}</p>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+            </div>
         </section>
     )
 }

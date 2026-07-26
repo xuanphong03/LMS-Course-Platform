@@ -23,8 +23,8 @@ export default function Header() {
     const { data: session, isPending } = authClient.useSession()
 
     return (
-        <header className='bg-background/95 backdrop-blur-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b'>
-            <div className='mx-auto flex max-w-350 items-center justify-between space-x-8 py-4'>
+        <header className='bg-background/95 backdrop-blur-[backdrop-filter]:bg-background/60 sticky top-0 z-50 h-20 w-full border-b'>
+            <div className='mx-auto flex h-full max-w-340 items-center justify-between space-x-8'>
                 <Link href={ROUTES.HOME}>
                     <Image
                         alt='LMS Courses Platform'
