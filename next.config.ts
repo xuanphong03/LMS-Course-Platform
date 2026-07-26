@@ -1,6 +1,11 @@
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
+    experimental: {
+        // Dev server không giữ cache Turbopack qua nhiều phiên để tránh thư mục
+        // .next/dev phình vô hạn và làm tăng RSS của tiến trình Node theo thời gian.
+        turbopackFileSystemCacheForDev: false,
+    },
     images: {
         formats: ['image/webp'],
         minimumCacheTTL: 2678400,

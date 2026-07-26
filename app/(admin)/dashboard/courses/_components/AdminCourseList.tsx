@@ -14,6 +14,7 @@ export default function AdminCourseList({ data }: AdminCourseListProps) {
                     <AdminCourseCard
                         key={item.id}
                         data={item}
+                        className='col-span-1'
                     />
                 ))}
         </div>
