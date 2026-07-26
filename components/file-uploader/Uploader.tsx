@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils'
 import { v4 as uuidv4 } from 'uuid'
 import { FileRejection, useDropzone } from 'react-dropzone'
 import { Card, CardContent } from '@/components/ui/card'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import {
     RenderEmptyState,
@@ -34,9 +34,6 @@ interface UploaderProps {
 }
 export default function Uploader({ id, value, onChange, fileTypeAccepted = 'image' }: UploaderProps) {
     const fileUrl = useConstruct(value || '')
-    const uploadAbortControllerRef = useRef<AbortController | null>(null)
-    const deleteAbortControllerRef = useRef<AbortController | null>(null)
-    const xhrRef = useRef<XMLHttpRequest | null>(null)
     const [fileState, setFileState] = useState<UploaderState>({
         error: false,
         file: null,
@@ -51,11 +48,6 @@ export default function Uploader({ id, value, onChange, fileTypeAccepted = 'imag
 
     const handleUploadFile = useCallback(
         async (file: File) => {
-            const abortController = new AbortController()
-            uploadAbortControllerRef.current?.abort()
-            xhrRef.current?.abort()
-            uploadAbortControllerRef.current = abortController
-
             try {
                 setFileState((prevState) => ({
                     ...prevState,
@@ -72,7 +64,6 @@ export default function Uploader({ id, value, onChange, fileTypeAccepted = 'imag
                         size: file.size,
                         isImage: fileTypeAccepted === 'image',
                     }),
-                    signal: abortController.signal,
                 })
 
                 if (!presignedResponse.ok) {
@@ -99,7 +90,6 @@ export default function Uploader({ id, value, onChange, fileTypeAccepted = 'imag
 
                 await new Promise<void>((resolve, reject) => {
                     const xhr = new XMLHttpRequest()
-                    xhrRef.current = xhr
                     xhr.upload.onprogress = (event) => {
                         if (event.lengthComputable) {
                             const percentageCompleted = (event.loaded / event.total) * 100
@@ -110,7 +100,6 @@ export default function Uploader({ id, value, onChange, fileTypeAccepted = 'imag
                         }
                     }
                     xhr.onload = () => {
-                        xhrRef.current = null
                         if (xhr.status === 200 || xhr.status == 204) {
                             setFileState((prevState) => ({
                                 ...prevState,
@@ -126,20 +115,13 @@ export default function Uploader({ id, value, onChange, fileTypeAccepted = 'imag
                         }
                     }
                     xhr.onerror = () => {
-                        xhrRef.current = null
                         reject(new Error('Upload failed. Check Tigris CORS settings for PUT and Content-Type.'))
-                    }
-                    xhr.onabort = () => {
-                        xhrRef.current = null
-                        reject(new DOMException('Upload aborted', 'AbortError'))
                     }
                     xhr.open('PUT', presignedUrl)
                     xhr.setRequestHeader('Content-Type', file.type)
                     xhr.send(file)
                 })
             } catch (error) {
-                if (error instanceof DOMException && error.name === 'AbortError') return
-
                 toast.error(error instanceof Error ? error.message : 'Something went wrong')
                 setFileState((prevState) => ({
                     ...prevState,
@@ -151,10 +133,6 @@ export default function Uploader({ id, value, onChange, fileTypeAccepted = 'imag
 
                 if (fileState.objectUrl && !fileState.objectUrl.startsWith('http')) {
                     URL.revokeObjectURL(fileState.objectUrl)
-                }
-            } finally {
-                if (uploadAbortControllerRef.current === abortController) {
-                    uploadAbortControllerRef.current = null
                 }
             }
         },
@@ -204,10 +182,6 @@ export default function Uploader({ id, value, onChange, fileTypeAccepted = 'imag
     const handleRemoveFile = async () => {
         if (fileState.isDeleting || !fileState.objectUrl) return
 
-        const abortController = new AbortController()
-        deleteAbortControllerRef.current?.abort()
-        deleteAbortControllerRef.current = abortController
-
         try {
             setFileState((prevState) => ({
                 ...prevState,
@@ -218,7 +192,6 @@ export default function Uploader({ id, value, onChange, fileTypeAccepted = 'imag
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ key: fileState.key }),
-                signal: abortController.signal,
             })
 
             if (!response.ok) {
@@ -251,19 +224,13 @@ export default function Uploader({ id, value, onChange, fileTypeAccepted = 'imag
             }))
 
             toast.success('File removed successfully')
-        } catch (error) {
-            if (error instanceof DOMException && error.name === 'AbortError') return
-
+        } catch {
             toast.error('Error removing file. Please try again')
             setFileState((prev) => ({
                 ...prev,
                 isDeleting: false,
                 error: true,
             }))
-        } finally {
-            if (deleteAbortControllerRef.current === abortController) {
-                deleteAbortControllerRef.current = null
-            }
         }
     }
 
@@ -304,11 +271,6 @@ export default function Uploader({ id, value, onChange, fileTypeAccepted = 'imag
 
     useEffect(() => {
         return () => {
-            // Preview có thể đổi trước khi request kết thúc; hủy cả request và XHR
-            // để callback không tiếp tục giữ File/state sau vòng đời hiện tại.
-            uploadAbortControllerRef.current?.abort()
-            deleteAbortControllerRef.current?.abort()
-            xhrRef.current?.abort()
             if (fileState.objectUrl && !fileState.objectUrl.startsWith('http')) {
                 URL.revokeObjectURL(fileState.objectUrl)
             }

@@ -24,10 +24,12 @@ import { tryCatch } from '@/hooks/try-catch'
 import { createCourse } from '@/app/(admin)/dashboard/courses/create/actions'
 import { useRouter } from 'next/navigation'
 import { ROUTES } from '@/consts/routes'
+import { useConfetti } from '@/hooks/use-confetti'
 
 export default function CourseCreationForm() {
     const router = useRouter()
     const [pending, startTransition] = useTransition()
+    const { triggerConfetti } = useConfetti()
 
     const form = useForm<CourseFormDataType>({
         resolver: zodResolver(courseFormSchema),
@@ -55,6 +57,7 @@ export default function CourseCreationForm() {
 
             if (result.status === 'success') {
                 toast.success(result.message)
+                triggerConfetti()
                 form.reset()
                 router.push(ROUTES.DASHBOARD_COURSES)
             } else if (result.status === 'error') {

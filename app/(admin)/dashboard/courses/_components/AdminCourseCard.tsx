@@ -84,7 +84,7 @@ export default function AdminCourseCard({ data, className }: iAppProps) {
                     <Link href={ROUTES.DASHBOARD_COURSES_EDIT(data.id)}>{data.title}</Link>
                 </h4>
                 <p className='text-muted-foreground mt-2 line-clamp-2 text-sm leading-snug'>{data.shortDescription}</p>
-                <div className='mt-4 flex flex-wrap items-center gap-x-5'>
+                <div className='mt-4 flex flex-wrap items-center gap-x-5 gap-y-2'>
                     <div className='flex items-center gap-x-2'>
                         <TagIcon className='text-primary bg-primary/10 size-6 rounded-md p-1' />
                         <span>{data.category}</span>
