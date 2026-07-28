@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/db'
-import { notFound } from 'next/navigation'
+import { cache } from 'react'
 
-export async function getSingularCourse({ slug }: { slug: string }) {
+export const getSingularCourse = cache(async ({ slug }: { slug: string }) => {
     const course = await prisma.course.findUnique({
         where: {
             slug: slug,
@@ -16,6 +16,7 @@ export async function getSingularCourse({ slug }: { slug: string }) {
             duration: true,
             level: true,
             category: true,
+            slug: true,
             chapters: {
                 select: {
                     id: true,
@@ -37,7 +38,9 @@ export async function getSingularCourse({ slug }: { slug: string }) {
         },
     })
     if (!course) {
-        return notFound()
+        return null
     }
     return course
-}
+})
+
+export type PublicCourseDetailType = Awaited<ReturnType<typeof getSingularCourse>>
