@@ -25,6 +25,16 @@ function getEditorFormValue(editor: Editor) {
     return editor.getText().trim() ? JSON.stringify(editor.getJSON()) : ''
 }
 
+function parseEditorValue(value: string) {
+    if (!value.trim()) return ''
+
+    try {
+        return JSON.parse(value)
+    } catch {
+        return value
+    }
+}
+
 export default function RichTextEditor({
     id,
     value,
@@ -36,7 +46,7 @@ export default function RichTextEditor({
     const editor = useEditor({
         extensions,
         immediatelyRender: false,
-        content: value || '',
+        content: parseEditorValue(value),
         editorProps: {
             attributes: {
                 ...(id ? { id } : {}),
@@ -59,7 +69,7 @@ export default function RichTextEditor({
         const editorValue = getEditorFormValue(editor)
 
         if (value !== editorValue) {
-            editor.commands.setContent(value || '', { emitUpdate: false })
+            editor.commands.setContent(parseEditorValue(value), { emitUpdate: false })
         }
     }, [editor, value])
 

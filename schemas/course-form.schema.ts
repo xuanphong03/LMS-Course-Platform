@@ -1,4 +1,5 @@
 import z from 'zod/v3'
+import { getRichTextCharacterCount } from '@/schemas/rich-text-content'
 
 export const courseLevels = ['Beginner', 'Intermediate', 'Advanced'] as const
 export const courseStatuses = ['Draft', 'Publish', 'Archive'] as const
@@ -18,7 +19,17 @@ export const courseCategories = [
 export const courseFormSchema = z.object({
     title: z.string().min(3, 'Title must be at least 3 characters.').max(100, 'Title must be at most 100 characters.'),
     slug: z.string().min(3, 'Slug must be at least 3 characters'),
-    description: z.string().max(2500, 'Description must be at most 2500 characters.'),
+    description: z.string().superRefine((value, ctx) => {
+        if (getRichTextCharacterCount(value) > 2500) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.too_big,
+                maximum: 2500,
+                type: 'string',
+                inclusive: true,
+                message: 'Description must be at most 2500 characters.',
+            })
+        }
+    }),
     shortDescription: z
         .string()
         .min(3, 'Short description must be at least 3 characters')

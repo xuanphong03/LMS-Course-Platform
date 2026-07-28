@@ -23,13 +23,19 @@ export default function PublicCourseCard({ data, className }: PublicCourseCardPr
         <article className={cn('group', className)}>
             <Card className='relative h-full gap-0 py-0'>
                 <Badge className='absolute top-2 right-2 z-10'>{data.level}</Badge>
-                <Image
-                    alt={data?.title}
-                    width={600}
-                    height={400}
-                    src={thumbnailUrl}
-                    className='aspect-video w-full rounded-t-xl object-cover'
-                />
+                <Link
+                    href={ROUTES.PUBLIC_COURSE_DETAIL(data.slug)}
+                    className='relative inline-block aspect-video overflow-hidden rounded-t-xl'
+                >
+                    <Image
+                        alt={data?.title}
+                        width={600}
+                        height={400}
+                        src={thumbnailUrl}
+                        className='h-full w-full object-cover transition-transform group-hover:scale-105'
+                    />
+                    <div className='absolute top-0 left-0 h-full w-full bg-linear-to-t from-black/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100'></div>
+                </Link>
                 <CardContent className='flex flex-1 flex-col justify-between p-4'>
                     <div>
                         <h4>
