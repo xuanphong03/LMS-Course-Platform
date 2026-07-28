@@ -15,7 +15,7 @@ interface NavigationItemProps {
 
 const navigationItems: NavigationItemProps[] = [
     { name: 'Home', href: ROUTES.HOME },
-    { name: 'Courses', href: ROUTES.COURSES },
+    { name: 'Courses', href: ROUTES.PUBLIC_COURSES },
     { name: 'Dashboard', href: ROUTES.DASHBOARD },
 ]
 

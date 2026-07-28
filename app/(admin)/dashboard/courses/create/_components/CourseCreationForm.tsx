@@ -69,7 +69,12 @@ export default function CourseCreationForm() {
     const handleGenerateSlug = () => {
         const courseTitle = form.getValues('title')
         if (!courseTitle) return
-        const courseSlug = slugify(courseTitle)
+        const courseSlug = slugify(courseTitle, {
+            lower: true,
+            strict: true,
+            trim: true,
+            locale: 'vi',
+        })
         form.setValue('slug', courseSlug, { shouldValidate: true })
     }
 

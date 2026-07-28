@@ -37,7 +37,7 @@ export default function HeroSection() {
                 </p>
                 <div className='flex flex-col gap-4 sm:flex-row'>
                     <Link
-                        href={ROUTES.COURSES}
+                        href={ROUTES.PUBLIC_COURSES}
                         className={buttonVariants({ size: 'lg', className: 'min-w-40' })}
                     >
                         Explore courses

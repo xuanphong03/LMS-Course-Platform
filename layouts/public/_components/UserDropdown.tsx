@@ -39,7 +39,7 @@ const dropdownMenuItems: DropdownMenuItem[] = [
     {
         icon: <BookOpen size={16} />,
         name: 'Courses',
-        href: ROUTES.COURSES,
+        href: ROUTES.PUBLIC_COURSES,
     },
     {
         icon: <LayoutDashboard size={16} />,

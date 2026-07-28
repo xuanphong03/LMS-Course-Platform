@@ -19,15 +19,14 @@ interface RichTextEditorProps {
     placeholder?: string
 }
 
-const extensions = [TextStyleKit, StarterKit, TextAlign.configure({ types: ['heading', 'paragraph'] })]
+export const extensions = [TextStyleKit, StarterKit, TextAlign.configure({ types: ['heading', 'paragraph'] })]
 
 function getEditorFormValue(editor: Editor) {
-    return editor.getText().trim() ? editor.getHTML() : ''
+    return editor.getText().trim() ? JSON.stringify(editor.getJSON()) : ''
 }
 
 export default function RichTextEditor({
     id,
-    name,
     value,
     onChange,
     onBlur,

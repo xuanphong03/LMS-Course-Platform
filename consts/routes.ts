@@ -1,6 +1,5 @@
 export const ROUTES = {
     HOME: '/',
-    COURSES: '/courses',
     LOGIN: '/login',
     REGISTER: '/register',
     VERIFY_REQUEST: '/verify-request',
@@ -13,4 +12,6 @@ export const ROUTES = {
     FORBIDDEN: '/forbidden',
     DASHBOARD_LESSONS_EDIT: (courseId: string, chapterId: string, lessonId: string) =>
         `/dashboard/courses/${courseId}/${chapterId}/${lessonId}`,
+    PUBLIC_COURSES: '/courses',
+    PUBLIC_COURSE_DETAIL: (courseSlug: string) => `/courses/${courseSlug}`,
 }
