@@ -1,13 +1,11 @@
 'use client'
 
 import MenuBar from '@/components/rich-text-editor/MenuBar'
-import { TextStyleKit } from '@tiptap/extension-text-style'
-import { TextAlign } from '@tiptap/extension-text-align'
 import { EditorContent, useEditor } from '@tiptap/react'
-import StarterKit from '@tiptap/starter-kit'
 import '@/components/rich-text-editor/styles.css'
 import type { Editor } from '@tiptap/core'
 import { useEffect } from 'react'
+import { extensions } from '@/components/rich-text-editor/extensions'
 
 interface RichTextEditorProps {
     id?: string
@@ -18,8 +16,6 @@ interface RichTextEditorProps {
     invalid?: boolean
     placeholder?: string
 }
-
-export const extensions = [TextStyleKit, StarterKit, TextAlign.configure({ types: ['heading', 'paragraph'] })]
 
 function getEditorFormValue(editor: Editor) {
     return editor.getText().trim() ? JSON.stringify(editor.getJSON()) : ''
