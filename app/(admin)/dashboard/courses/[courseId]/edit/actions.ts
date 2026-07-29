@@ -6,7 +6,7 @@ import {
     isValidLessonOrder,
 } from '@/app/(admin)/dashboard/courses/[courseId]/edit/_lib/course-structure-order.validation'
 import { ROUTES } from '@/consts/routes'
-import arcjet, { detectBot, fixedWindow } from '@/lib/arcjet'
+import arcjet, { fixedWindow } from '@/lib/arcjet'
 import { prisma } from '@/lib/db'
 import { ApiResponse } from '@/lib/types'
 import { CourseFormDataType, courseFormSchema } from '@/schemas/course-form.schema'
@@ -17,20 +17,13 @@ import { revalidatePath } from 'next/cache'
 import { chapterSchema, ChapterSchemaType } from '@/schemas/chapter-form.schema'
 import { lessonSchema, LessonSchemaType } from '@/schemas/lesson-form.schema'
 
-const aj = arcjet
-    .withRule(
-        detectBot({
-            mode: 'LIVE',
-            allow: [],
-        }),
-    )
-    .withRule(
-        fixedWindow({
-            mode: 'LIVE',
-            window: '1m',
-            max: 5,
-        }),
-    )
+const aj = arcjet.withRule(
+    fixedWindow({
+        mode: 'LIVE',
+        window: '1m',
+        max: 5,
+    }),
+)
 
 /**
  * Cập nhật thông tin course thuộc admin hiện tại.
