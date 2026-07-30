@@ -117,7 +117,7 @@ export default function CourseEnrollment({ course, isEnrolled }: CourseEnrollmen
                             Watch Course
                         </Link>
                     ) : (
-                        <EnrollmentButton />
+                        <EnrollmentButton course={course} />
                     )}
                     <p className='text-muted-foreground mt-3 text-center text-xs'>30-day money-back guarantee</p>
                 </CardContent>

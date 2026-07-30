@@ -31,6 +31,14 @@ export async function enrollInCourseAction({ courseId }: { courseId: string }): 
     // Không cho phép tạo checkout session nếu request không gắn với user đã đăng nhập.
     const { user } = await requireUser()
 
+    // Server Action vẫn phải kiểm tra lại dữ liệu vì client có thể gửi request thủ công hoặc bị stale UI.
+    if (!courseId) {
+        return {
+            status: 'error',
+            message: 'Course id is required',
+        }
+    }
+
     let checkoutUrl: string
     try {
         // request() cung cấp thông tin request để Arcjet đánh giá; fingerprint theo user.id
@@ -118,7 +126,7 @@ export async function enrollInCourseAction({ courseId }: { courseId: string }): 
             if (existingEnrollment?.status === 'Active') {
                 return {
                     status: 'success',
-                    message: 'Your are already enrolled in this course',
+                    message: 'You are already enrolled in this course',
                 }
             }
 
@@ -171,7 +179,15 @@ export async function enrollInCourseAction({ courseId }: { courseId: string }): 
             }
         })
 
-        checkoutUrl = result.checkoutUrl as string
+        const checkoutSessionUrl = result.checkoutUrl
+        if (typeof checkoutSessionUrl !== 'string') {
+            return {
+                status: 'success',
+                message: 'You are already enrolled in this course',
+            }
+        }
+
+        checkoutUrl = checkoutSessionUrl
     } catch (error) {
         // Không trả chi tiết lỗi Stripe cho client vì có thể làm lộ thông tin nội bộ của payment provider.
         if (error instanceof Stripe.errors.StripeError) {

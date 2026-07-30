@@ -14,7 +14,7 @@ export default function EnrollmentButton({ course }: { course: PublicCourseDetai
     const handleEnrollment = () => {
         startTransition(async () => {
             const { data: result, error } = await tryCatch(enrollInCourseAction({ courseId: course?.id as string }))
-
+            console.log({ result, error })
             if (error) {
                 toast.error('An unexpected error occurred. Please try again.')
                 return
@@ -37,7 +37,7 @@ export default function EnrollmentButton({ course }: { course: PublicCourseDetai
         >
             {pending ? (
                 <>
-                    <span>Enrolling...</span> <Loader className='size-4' />
+                    <span>Enrolling...</span> <Loader className='size-4 animate-spin' />
                 </>
             ) : (
                 <span> Enroll Now!</span>
