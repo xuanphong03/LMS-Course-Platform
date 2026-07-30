@@ -1,3 +1,4 @@
+import { enrollInCourseAction } from '@/app/(public)/courses/[slug]/actions'
 import { PublicCourseDetailType } from '@/app/data/course/get-singular-course'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -105,7 +106,23 @@ export default function CourseEnrollment({ course }: CourseEnrollmentProps) {
                         </ul>
                     </div>
 
-                    <Button className='w-full'>Enroll Now!</Button>
+                    <form
+                        action={async () => {
+                            'use server'
+                            if (!course?.id) return
+
+                            await enrollInCourseAction({
+                                courseId: course.id,
+                            })
+                        }}
+                    >
+                        <Button
+                            type='submit'
+                            className='w-full'
+                        >
+                            Enroll Now!
+                        </Button>
+                    </form>
                     <p className='text-muted-foreground mt-3 text-center text-xs'>30-day money-back guarantee</p>
                 </CardContent>
             </Card>
