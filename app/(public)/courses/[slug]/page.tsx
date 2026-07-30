@@ -1,6 +1,7 @@
 import CourseEnrollment from '@/app/(public)/courses/[slug]/_components/CourseEnrollment'
 import CourseInformation from '@/app/(public)/courses/[slug]/_components/CourseInformation'
 import { getSingularCourse } from '@/app/data/course/get-singular-course'
+import { checkoutIfCourseBought } from '@/app/data/user/user-is-enrolled'
 import { env } from '@/lib/env'
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
@@ -60,10 +61,11 @@ interface CourseDetailPageProps {
 export default async function CourseDetailPage({ params }: CourseDetailPageProps) {
     const { slug } = await params
     const course = await getSingularCourse({ slug: slug })
-
     if (!course) {
         return notFound()
     }
+
+    const isEnrolled = await checkoutIfCourseBought({ courseId: course.id })
 
     return (
         <main className='relative py-5'>
@@ -72,7 +74,10 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
                     <CourseInformation course={course} />
                 </div>
                 <div className='col-span-full md:col-span-1'>
-                    <CourseEnrollment course={course} />
+                    <CourseEnrollment
+                        course={course}
+                        isEnrolled={isEnrolled}
+                    />
                 </div>
             </div>
         </main>

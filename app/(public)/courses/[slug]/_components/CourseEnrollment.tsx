@@ -1,12 +1,15 @@
 import { enrollInCourseAction } from '@/app/(public)/courses/[slug]/actions'
 import { PublicCourseDetailType } from '@/app/data/course/get-singular-course'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { ROUTES } from '@/consts/routes'
 import { IconBook, IconCategory, IconChartBar, IconClock } from '@tabler/icons-react'
 import { CheckIcon } from 'lucide-react'
+import Link from 'next/link'
 
 interface CourseEnrollmentProps {
     course: PublicCourseDetailType
+    isEnrolled: boolean
 }
 
 const courseBenefits: { title: string }[] = [
@@ -15,7 +18,7 @@ const courseBenefits: { title: string }[] = [
     { title: 'Certificate of completion' },
 ]
 
-export default function CourseEnrollment({ course }: CourseEnrollmentProps) {
+export default function CourseEnrollment({ course, isEnrolled }: CourseEnrollmentProps) {
     const totalLessons = course?.chapters?.reduce((total, chapter) => total + (chapter?.lessons?.length || 0), 0) || 0
 
     return (
@@ -106,23 +109,21 @@ export default function CourseEnrollment({ course }: CourseEnrollmentProps) {
                         </ul>
                     </div>
 
-                    <form
-                        action={async () => {
-                            'use server'
-                            if (!course?.id) return
-
-                            await enrollInCourseAction({
-                                courseId: course.id,
-                            })
-                        }}
-                    >
+                    {isEnrolled ? (
+                        <Link
+                            href={ROUTES.DASHBOARD}
+                            className={buttonVariants({ className: 'w-full' })}
+                        >
+                            Watch Course
+                        </Link>
+                    ) : (
                         <Button
-                            type='submit'
+                            type='button'
                             className='w-full'
                         >
                             Enroll Now!
                         </Button>
-                    </form>
+                    )}
                     <p className='text-muted-foreground mt-3 text-center text-xs'>30-day money-back guarantee</p>
                 </CardContent>
             </Card>

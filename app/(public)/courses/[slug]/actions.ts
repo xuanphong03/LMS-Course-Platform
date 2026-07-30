@@ -1,15 +1,24 @@
 'use server'
 
 import { requireUser } from '@/app/data/user/require-user'
+import arcjet, { fixedWindow } from '@/lib/arcjet'
 import { prisma } from '@/lib/db'
+import { env } from '@/lib/env'
 import { stripe } from '@/lib/stripe'
 import { ApiResponse } from '@/lib/types'
+import { request } from '@arcjet/next'
 import { redirect } from 'next/navigation'
 import Stripe from 'stripe'
 
-interface EnrollInCourseActionProps {
-    courseId: string
-}
+// Giới hạn số lần khởi tạo checkout trong mỗi phút để giảm double-click, spam request
+// và chi phí phát sinh khi phải tạo Stripe Customer/Checkout Session.
+const aj = arcjet.withRule(
+    fixedWindow({
+        mode: 'LIVE',
+        window: '1m',
+        max: 5,
+    }),
+)
 
 /**
  * Khởi tạo một lần thanh toán cho khóa học và chuyển người dùng sang Stripe Checkout.
@@ -18,13 +27,24 @@ interface EnrollInCourseActionProps {
  * cập nhật Enrollment ở trạng thái Pending → tạo Checkout Session → redirect sang Stripe.
  * Enrollment chỉ được xem là hoàn tất sau khi webhook xác nhận thanh toán thành công.
  */
-export async function enrollInCourseAction({ courseId }: EnrollInCourseActionProps): Promise<ApiResponse | never> {
+export async function enrollInCourseAction({ courseId }: { courseId: string }): Promise<ApiResponse | never> {
     // Không cho phép tạo checkout session nếu request không gắn với user đã đăng nhập.
     const { user } = await requireUser()
 
     let checkoutUrl: string
-
     try {
+        // request() cung cấp thông tin request để Arcjet đánh giá; fingerprint theo user.id
+        // giúp giới hạn theo tài khoản thay vì chỉ theo IP, phù hợp với người dùng đăng nhập.
+        const req = await request()
+        const decision = await aj.protect(req, { fingerprint: user.id })
+        if (decision.isDenied()) {
+            // Dừng trước mọi thao tác database/Stripe để request bị giới hạn không tạo giao dịch dở dang.
+            return {
+                status: 'error',
+                message: 'You have been blocked',
+            }
+        }
+
         // Lấy giá từ database thay vì tin dữ liệu từ client để tránh thay đổi số tiền thanh toán.
         const course = await prisma.course.findUnique({
             where: {
@@ -135,8 +155,8 @@ export async function enrollInCourseAction({ courseId }: EnrollInCourseActionPro
                     },
                 ],
                 mode: 'payment',
-                success_url: 'abc',
-                cancel_url: 'abc',
+                success_url: `${env.BETTER_AUTH_URL}/payment/success`,
+                cancel_url: `${env.BETTER_AUTH_URL}/payment/cancel`,
                 metadata: {
                     // Metadata là cầu nối để webhook xác định user, course và Enrollment cần cập nhật.
                     userId: user.id,
