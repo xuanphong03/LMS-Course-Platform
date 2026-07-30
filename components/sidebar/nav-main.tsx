@@ -29,7 +29,7 @@ export function NavMain({
                         <SidebarMenuButton
                             tooltip='Quick Create'
                             className='bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground min-w-8 duration-200 ease-linear'
-                            render={<Link href={ROUTES.DASHBOARD_COURSES_CREATE} />}
+                            render={<Link href={ROUTES.ADMIN_COURSES_CREATE} />}
                         >
                             <CirclePlusIcon />
                             <span>Quick Create</span>

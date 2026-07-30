@@ -111,7 +111,7 @@ export default function CourseEnrollment({ course, isEnrolled }: CourseEnrollmen
 
                     {isEnrolled ? (
                         <Link
-                            href={ROUTES.DASHBOARD}
+                            href={ROUTES.USER_DASHBOARD}
                             className={buttonVariants({ className: 'w-full' })}
                         >
                             Watch Course

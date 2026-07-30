@@ -13,6 +13,7 @@ const aj = arcjet({
                 'CATEGORY:SEARCH_ENGINE', // Google, Bing, etc
                 'CATEGORY:MONITOR', // Uptime monitoring services
                 'CATEGORY:PREVIEW', // Link previews e.g. Slack, Discord
+                'STRIPE_WEBHOOK',
             ],
         }),
     ],
@@ -39,7 +40,7 @@ export const config = {
 
 // Pass any existing middleware with the optional existingMiddleware prop
 export default createMiddleware(aj, async (request: NextRequest) => {
-    if (request.nextUrl.pathname.startsWith('/dashboard')) {
+    if (request.nextUrl.pathname.startsWith('/admin')) {
         return authMiddleware(request)
     }
     return NextResponse.next()

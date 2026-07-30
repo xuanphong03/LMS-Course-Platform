@@ -34,12 +34,12 @@ const data = {
     navMain: [
         {
             title: 'Dashboard',
-            url: ROUTES.DASHBOARD,
+            url: ROUTES.ADMIN,
             icon: <LayoutDashboardIcon />,
         },
         {
             title: 'Courses',
-            url: ROUTES.DASHBOARD_COURSES,
+            url: ROUTES.ADMIN_COURSES,
             icon: <ListIcon />,
         },
         {

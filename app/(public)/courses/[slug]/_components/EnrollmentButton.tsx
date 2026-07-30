@@ -13,12 +13,9 @@ export default function EnrollmentButton({ course }: { course: PublicCourseDetai
 
     const handleEnrollment = () => {
         startTransition(async () => {
-            const { data: result, error } = await tryCatch(enrollInCourseAction({ courseId: course?.id as string }))
-            console.log({ result, error })
-            if (error) {
-                toast.error('An unexpected error occurred. Please try again.')
-                return
-            }
+            const { data: result } = await tryCatch(enrollInCourseAction({ courseId: course?.id as string }))
+
+            if (!result) return
 
             if (result.status === 'success') {
                 toast.success(result.message)

@@ -26,8 +26,8 @@ interface DropdownItem {
 
 const dropdownItems: DropdownItem[] = [
     { icon: <HomeIcon />, name: 'Homepage', href: ROUTES.HOME },
-    { icon: <LayoutDashboardIcon />, name: 'Dashboard', href: ROUTES.DASHBOARD },
-    { icon: <Tv2Icon />, name: 'Courses', href: ROUTES.DASHBOARD_COURSES },
+    { icon: <LayoutDashboardIcon />, name: 'Dashboard', href: ROUTES.ADMIN },
+    { icon: <Tv2Icon />, name: 'Courses', href: ROUTES.ADMIN_COURSES },
 ]
 
 export function NavUser() {

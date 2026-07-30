@@ -44,7 +44,7 @@ const dropdownMenuItems: DropdownMenuItem[] = [
     {
         icon: <LayoutDashboard size={16} />,
         name: 'Dashboard',
-        href: ROUTES.DASHBOARD,
+        href: ROUTES.ADMIN,
     },
 ]
 

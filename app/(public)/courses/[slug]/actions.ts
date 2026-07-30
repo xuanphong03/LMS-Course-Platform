@@ -27,7 +27,7 @@ const aj = arcjet.withRule(
  * cập nhật Enrollment ở trạng thái Pending → tạo Checkout Session → redirect sang Stripe.
  * Enrollment chỉ được xem là hoàn tất sau khi webhook xác nhận thanh toán thành công.
  */
-export async function enrollInCourseAction({ courseId }: { courseId: string }): Promise<ApiResponse | never> {
+export async function enrollInCourseAction({ courseId }: { courseId: string }): Promise<ApiResponse | null> {
     // Không cho phép tạo checkout session nếu request không gắn với user đã đăng nhập.
     const { user } = await requireUser()
 
@@ -202,6 +202,6 @@ export async function enrollInCourseAction({ courseId }: { courseId: string }): 
         }
     }
 
-    // Redirect chỉ xảy ra sau khi đã tạo thành công session; nếu không, lỗi được trả về ở trên.
+    // Chuyển hướng sang trang thanh toán
     redirect(checkoutUrl)
 }
