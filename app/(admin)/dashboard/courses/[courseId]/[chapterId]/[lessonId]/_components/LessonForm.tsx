@@ -40,8 +40,6 @@ export default function LessonForm({ data, courseId, chapterId }: ILessonFormPro
     })
 
     const handleSubmitForm = (values: LessonSchemaType) => {
-        console.log({ values })
-
         startTransition(async () => {
             const { data: result, error } = await tryCatch(updateLesson({ data: values, lessonId: data.id }))
 
@@ -49,7 +47,7 @@ export default function LessonForm({ data, courseId, chapterId }: ILessonFormPro
                 toast.error('An unexpected error occurred. Please try again.')
                 return
             }
-            console.log({ status: result.status })
+
             if (result.status === 'success') {
                 toast.success(result.message)
             } else {

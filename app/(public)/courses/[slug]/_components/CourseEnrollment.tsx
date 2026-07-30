@@ -1,6 +1,6 @@
-import { enrollInCourseAction } from '@/app/(public)/courses/[slug]/actions'
+import EnrollmentButton from '@/app/(public)/courses/[slug]/_components/EnrollmentButton'
 import { PublicCourseDetailType } from '@/app/data/course/get-singular-course'
-import { Button, buttonVariants } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { ROUTES } from '@/consts/routes'
 import { IconBook, IconCategory, IconChartBar, IconClock } from '@tabler/icons-react'
@@ -117,12 +117,7 @@ export default function CourseEnrollment({ course, isEnrolled }: CourseEnrollmen
                             Watch Course
                         </Link>
                     ) : (
-                        <Button
-                            type='button'
-                            className='w-full'
-                        >
-                            Enroll Now!
-                        </Button>
+                        <EnrollmentButton />
                     )}
                     <p className='text-muted-foreground mt-3 text-center text-xs'>30-day money-back guarantee</p>
                 </CardContent>
