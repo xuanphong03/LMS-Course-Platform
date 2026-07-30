@@ -12,17 +12,20 @@ interface EnrollInCourseActionProps {
 }
 
 /**
- * Đảm bảo người dùng có Stripe Customer trước khi bắt đầu quy trình thanh toán.
+ * Khởi tạo một lần thanh toán cho khóa học và chuyển người dùng sang Stripe Checkout.
  *
- * Lưu ý: action hiện chưa tạo Checkout Session hoặc Enrollment; vì vậy chỉ nên xem
- * đây là bước chuẩn bị thanh toán, không phải xác nhận người dùng đã mua khóa học.
+ * Luồng: xác thực user → kiểm tra khóa học → lấy/tạo Stripe Customer → tạo hoặc
+ * cập nhật Enrollment ở trạng thái Pending → tạo Checkout Session → redirect sang Stripe.
+ * Enrollment chỉ được xem là hoàn tất sau khi webhook xác nhận thanh toán thành công.
  */
 export async function enrollInCourseAction({ courseId }: EnrollInCourseActionProps): Promise<ApiResponse | never> {
+    // Không cho phép tạo checkout session nếu request không gắn với user đã đăng nhập.
     const { user } = await requireUser()
 
     let checkoutUrl: string
 
     try {
+        // Lấy giá từ database thay vì tin dữ liệu từ client để tránh thay đổi số tiền thanh toán.
         const course = await prisma.course.findUnique({
             where: {
                 id: courseId,
@@ -43,6 +46,7 @@ export async function enrollInCourseAction({ courseId }: EnrollInCourseActionPro
         }
 
         let stripeCustomerId: string
+        // Tái sử dụng Customer giúp mỗi user chỉ có một hồ sơ Stripe và giữ lịch sử thanh toán liên tục.
         const userWithStripeCustomerId = await prisma.user.findUnique({
             where: {
                 id: user.id,
@@ -55,6 +59,7 @@ export async function enrollInCourseAction({ courseId }: EnrollInCourseActionPro
         if (userWithStripeCustomerId?.stripeCustomerId) {
             stripeCustomerId = userWithStripeCustomerId?.stripeCustomerId
         } else {
+            // Customer được tạo trước Checkout để Stripe gắn giao dịch với đúng tài khoản nội bộ.
             const customer = await stripe.customers.create({
                 email: user.email,
                 name: user.name,
@@ -75,6 +80,8 @@ export async function enrollInCourseAction({ courseId }: EnrollInCourseActionPro
         }
 
         const result = await prisma.$transaction(async (tx) => {
+            // Một user không nên có nhiều Enrollment cho cùng khóa học; unique key cũng bảo vệ
+            // trường hợp người dùng double-click hoặc gửi nhiều request đồng thời.
             const existingEnrollment = await tx.enrollment.findUnique({
                 where: {
                     courseId_userId: {
@@ -97,6 +104,7 @@ export async function enrollInCourseAction({ courseId }: EnrollInCourseActionPro
 
             let enrollment = null
             if (existingEnrollment) {
+                // Enrollment Pending/Cancel được dùng lại để tránh tạo bản ghi rác sau mỗi lần thanh toán lại.
                 enrollment = await tx.enrollment.update({
                     where: {
                         id: existingEnrollment.id,
@@ -130,6 +138,7 @@ export async function enrollInCourseAction({ courseId }: EnrollInCourseActionPro
                 success_url: 'abc',
                 cancel_url: 'abc',
                 metadata: {
+                    // Metadata là cầu nối để webhook xác định user, course và Enrollment cần cập nhật.
                     userId: user.id,
                     courseId: course.id,
                     enrollmentId: enrollment.id,
@@ -144,6 +153,7 @@ export async function enrollInCourseAction({ courseId }: EnrollInCourseActionPro
 
         checkoutUrl = result.checkoutUrl as string
     } catch (error) {
+        // Không trả chi tiết lỗi Stripe cho client vì có thể làm lộ thông tin nội bộ của payment provider.
         if (error instanceof Stripe.errors.StripeError) {
             return {
                 status: 'error',
@@ -156,5 +166,6 @@ export async function enrollInCourseAction({ courseId }: EnrollInCourseActionPro
         }
     }
 
+    // Redirect chỉ xảy ra sau khi đã tạo thành công session; nếu không, lỗi được trả về ở trên.
     redirect(checkoutUrl)
 }
