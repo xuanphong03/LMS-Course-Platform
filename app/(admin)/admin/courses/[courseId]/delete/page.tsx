@@ -3,7 +3,12 @@ import { buttonVariants } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ROUTES } from '@/consts/routes'
 import Link from 'next/link'
-import React from 'react'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+    title: 'Delete Course',
+    description: 'Confirm the deletion of a course from LMS Course Platform.',
+}
 
 export default function DeleteCoursePage() {
     return (

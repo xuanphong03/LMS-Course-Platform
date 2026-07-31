@@ -1,6 +1,15 @@
 import PublicCourseCard, { PublicCourseCardSkeleton } from '@/app/(public)/courses/_components/PublicCourseCard'
 import { getAllCourses } from '@/app/data/course/get-all-courses'
 import { Suspense } from 'react'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+    title: 'Explore Courses',
+    description: 'Explore online courses designed to help you achieve your learning goals.',
+    alternates: {
+        canonical: '/courses',
+    },
+}
 
 export default function PublicCoursesPage() {
     return (

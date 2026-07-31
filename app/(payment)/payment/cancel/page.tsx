@@ -6,8 +6,12 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-    title: 'Payment Failed | LMS Platform',
+    title: 'Payment Failed',
     description: 'Your payment could not be completed. Please try again or contact support if you need assistance.',
+    robots: {
+        index: false,
+        follow: false,
+    },
 }
 
 export default function PaymentCancelPage() {

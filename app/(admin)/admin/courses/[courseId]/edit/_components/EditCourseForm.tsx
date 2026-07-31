@@ -26,6 +26,7 @@ import { useTransition } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { AdminCourseSingularType } from '@/app/data/admin/admin-get-course'
+import { useConfetti } from '@/hooks/use-confetti'
 
 /**
  * Đây là Client Component vì biểu mẫu cần React Hook Form, editor và uploader tương tác với trình duyệt.
@@ -33,6 +34,7 @@ import { AdminCourseSingularType } from '@/app/data/admin/admin-get-course'
  */
 export default function EditCourseForm({ data }: { data: AdminCourseSingularType }) {
     const router = useRouter()
+    const { triggerConfetti } = useConfetti()
     const [pending, startTransition] = useTransition()
 
     const form = useForm<CourseFormDataType>({
@@ -61,7 +63,7 @@ export default function EditCourseForm({ data }: { data: AdminCourseSingularType
 
             if (result.status === 'success') {
                 toast.success(result.message)
-                form.reset()
+                triggerConfetti()
                 router.push(ROUTES.ADMIN_COURSES)
             } else if (result.status === 'error') {
                 toast.error(result.message)

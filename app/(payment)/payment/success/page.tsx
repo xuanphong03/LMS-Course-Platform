@@ -7,8 +7,12 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-    title: 'Payment Successful | LMS Platform',
+    title: 'Payment Successful',
     description: 'Your payment has been completed successfully. You can now access your enrolled course.',
+    robots: {
+        index: false,
+        follow: false,
+    },
 }
 
 export default function PaymentSuccessPage() {

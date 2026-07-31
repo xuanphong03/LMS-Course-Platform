@@ -2,6 +2,16 @@ import { buttonVariants } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import React from 'react'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+    title: 'Authentication',
+    description: 'Sign in or verify your LMS Course Platform account.',
+    robots: {
+        index: false,
+        follow: false,
+    },
+}
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
     return (

@@ -26,14 +26,17 @@ export async function generateMetadata({ params }: CourseDetailPageProps): Promi
     return {
         title: course.title,
         description: course.shortDescription,
+        alternates: {
+            canonical: `/courses/${course.slug}`,
+        },
 
         keywords: [course.title, 'online course', 'learning', course.category],
 
         openGraph: {
             title: course.title,
             description: course.shortDescription,
-            url: `${process.env.NEXT_PUBLIC_APP_URL}/courses/${course.slug}`,
-            siteName: 'LMS Platform',
+            url: `/courses/${course.slug}`,
+            siteName: 'LMS Course Platform',
             type: 'article',
             images: [
                 {

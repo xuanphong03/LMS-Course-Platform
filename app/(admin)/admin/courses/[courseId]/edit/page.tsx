@@ -1,10 +1,25 @@
 import { adminGetCourse } from '@/app/data/admin/admin-get-course'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ContentBasicInfo, ContentCourseStructure } from '@/app/(admin)/admin/courses/[courseId]/edit/_components'
+import { Metadata } from 'next'
 
-type Params = Promise<{ courseId: string }>
+export async function generateMetadata({ params }: iAppProps): Promise<Metadata> {
+    const { courseId } = await params
+
+    const course = await adminGetCourse(courseId)
+
+    return {
+        title: `Edit Course - ${course.title}`,
+        description: `Manage and update ${course.title} information, content, and course structure.`,
+        robots: {
+            index: false,
+            follow: false,
+        },
+    }
+}
+
 interface iAppProps {
-    params: Params
+    params: Promise<{ courseId: string }>
 }
 
 /**
