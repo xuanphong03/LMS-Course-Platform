@@ -118,6 +118,8 @@ model Course {
   chapters    Chapter[]
   enrollments Enrollment[]
 
+  stripePriceId String @unique
+
   @@map("course")
 }
 
