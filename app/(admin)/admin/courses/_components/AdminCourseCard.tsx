@@ -79,23 +79,27 @@ export default function AdminCourseCard({ data, className }: iAppProps) {
                 />
             </Link>
 
-            <CardContent className='p-4'>
-                <h4 className='group-hover:text-primary line-clamp-2 text-lg leading-snug font-medium transition-colors'>
-                    <Link href={ROUTES.ADMIN_COURSES_EDIT(data.id)}>{data.title}</Link>
-                </h4>
-                <p className='text-muted-foreground mt-2 line-clamp-2 text-sm leading-snug'>{data.shortDescription}</p>
-                <div className='mt-4 flex flex-wrap items-center gap-x-5 gap-y-2'>
-                    <div className='flex items-center gap-x-2'>
-                        <TagIcon className='text-primary bg-primary/10 size-6 rounded-md p-1' />
-                        <span>{data.category}</span>
-                    </div>
-                    <div className='flex items-center gap-x-2'>
-                        <SchoolIcon className='text-primary bg-primary/10 size-6 rounded-md p-1' />
-                        <span>{data.level}</span>
-                    </div>
-                    <div className='flex items-center gap-x-2'>
-                        <TimerIcon className='text-primary bg-primary/10 size-6 rounded-md p-1' />
-                        <span>{data.duration}h</span>
+            <CardContent className='flex flex-1 flex-col justify-between p-4'>
+                <div className='flex-1'>
+                    <h4 className='group-hover:text-primary line-clamp-2 text-lg leading-snug font-medium transition-colors'>
+                        <Link href={ROUTES.ADMIN_COURSES_EDIT(data.id)}>{data.title}</Link>
+                    </h4>
+                    <p className='text-muted-foreground mt-2 line-clamp-2 text-sm leading-snug'>
+                        {data.shortDescription}
+                    </p>
+                    <div className='mt-4 flex flex-wrap items-center gap-x-5 gap-y-2'>
+                        <div className='flex items-center gap-x-2'>
+                            <TagIcon className='text-primary bg-primary/10 size-6 rounded-md p-1' />
+                            <span>{data.category}</span>
+                        </div>
+                        <div className='flex items-center gap-x-2'>
+                            <SchoolIcon className='text-primary bg-primary/10 size-6 rounded-md p-1' />
+                            <span>{data.level}</span>
+                        </div>
+                        <div className='flex items-center gap-x-2'>
+                            <TimerIcon className='text-primary bg-primary/10 size-6 rounded-md p-1' />
+                            <span>{data.duration}h</span>
+                        </div>
                     </div>
                 </div>
                 <Link
