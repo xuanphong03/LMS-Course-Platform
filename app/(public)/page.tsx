@@ -4,7 +4,7 @@ import FeaturesSection from '@/app/(public)/_components/FeaturesSection'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-    title: 'Trang chủ',
+    title: 'Homepage',
     description: 'Discover online courses and start your learning journey.',
     alternates: {
         canonical: '/',
