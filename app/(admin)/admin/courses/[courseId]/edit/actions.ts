@@ -8,6 +8,7 @@ import {
 import { ROUTES } from '@/consts/routes'
 import arcjet, { fixedWindow } from '@/lib/arcjet'
 import { prisma } from '@/lib/db'
+import { stripe } from '@/lib/stripe'
 import { ApiResponse } from '@/lib/types'
 import { CourseFormDataType, courseFormSchema } from '@/schemas/course-form.schema'
 import { reorderChaptersSchema, reorderLessonsSchema } from '@/schemas/course-structure-order.schema'
@@ -28,13 +29,15 @@ const aj = arcjet.withRule(
 /**
  * Cập nhật thông tin course thuộc admin hiện tại.
  *
- * Luồng: Xác thực admin → Áp dụng bot/rate-limit protection → Validate dữ liệu
- * → Cập nhật đúng course thuộc quyền sở hữu.
+ * Luồng: xác thực admin → chống abuse → validate dữ liệu → kiểm tra ownership
+ * → cập nhật Product trên Stripe → cập nhật course trong database.
  */
 export async function editCourse(data: CourseFormDataType, courseId: string): Promise<ApiResponse> {
+    // Server Action vẫn phải xác thực lại quyền vì client có thể gửi request thủ công.
     const session = await requireAdmin()
 
     try {
+        // Chặn request spam/bot trước khi gọi Stripe và ghi database.
         const req = await request()
         const decision = await aj.protect(req, {
             fingerprint: session?.user.id as string,
@@ -53,6 +56,7 @@ export async function editCourse(data: CourseFormDataType, courseId: string): Pr
             }
         }
 
+        // Validate tại server để không lưu dữ liệu sai dù client đã có validation riêng.
         const result = courseFormSchema.safeParse(data)
         if (!result.success) {
             return {
@@ -61,18 +65,73 @@ export async function editCourse(data: CourseFormDataType, courseId: string): Pr
             }
         }
 
-        await prisma.course.update({
-            where: { id: courseId, userId: session.user.id },
-            data: {
-                ...result.data,
+        // Gộp ownership vào điều kiện truy vấn để admin chỉ có thể cập nhật course của mình.
+        const course = await prisma.course.findFirst({
+            where: {
+                id: courseId,
+                userId: session.user.id,
+            },
+            select: {
+                id: true,
+                stripePriceId: true,
+                stripeProductId: true,
             },
         })
+
+        if (!course) {
+            return {
+                status: 'error',
+                message: 'Course not found',
+            }
+        }
+
+        // Price vẫn cần được đọc để kiểm tra giá hiện tại, nhưng Product được lấy trực tiếp
+        // từ stripeProductId nhằm tránh phụ thuộc vào quan hệ Price → Product.
+        const price = await stripe.prices.retrieve(course.stripePriceId)
+        const productId = course.stripeProductId
+        const nextAmount = result.data.price * 100
+        let stripePriceId = course.stripePriceId
+
+        if (price.unit_amount !== nextAmount) {
+            // Stripe không cho sửa unit_amount của Price đã tạo; phải tạo Price mới để giữ lịch sử
+            // giao dịch cũ bất biến, sau đó chuyển Product sang Price mới.
+            const nextPrice = await stripe.prices.create({
+                product: productId,
+                currency: price.currency,
+                unit_amount: nextAmount,
+            })
+
+            stripePriceId = nextPrice.id
+        }
+
+        // Stripe Product lưu thông tin hiển thị ở bước thanh toán; cập nhật nó cùng lúc với course
+        // để tên/mô tả trong hệ thống và trên Stripe không bị lệch nhau.
+        await stripe.products.update(productId, {
+            name: result.data.title,
+            description: result.data.shortDescription,
+            ...(stripePriceId !== course.stripePriceId ? { default_price: stripePriceId } : {}),
+        })
+
+        // Chỉ ghi database sau khi Stripe cập nhật thành công để tránh course trỏ tới dữ liệu thanh toán cũ.
+        await prisma.course.update({
+            where: { id: course.id, userId: session.user.id },
+            data: {
+                ...result.data,
+                stripePriceId,
+            },
+        })
+
+        if (stripePriceId !== course.stripePriceId) {
+            // Price cũ không bị xóa để bảo toàn lịch sử Stripe, chỉ ngừng cho phép dùng trong checkout mới.
+            await stripe.prices.update(course.stripePriceId, { active: false })
+        }
 
         return {
             status: 'success',
             message: 'Course updated successfully',
         }
     } catch {
+        // Trả thông báo tổng quát vì lỗi có thể chứa thông tin nhạy cảm từ Stripe hoặc database.
         return {
             status: 'error',
             message: 'Failed to update course',

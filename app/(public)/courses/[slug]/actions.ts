@@ -63,6 +63,7 @@ export async function enrollInCourseAction({ courseId }: { courseId: string }): 
                 title: true,
                 price: true,
                 slug: true,
+                stripePriceId: true,
             },
         })
 
@@ -158,7 +159,8 @@ export async function enrollInCourseAction({ courseId }: { courseId: string }): 
                 customer: stripeCustomerId,
                 line_items: [
                     {
-                        price: 'price_1TysZEHwG10eF5gHSxSEwpYo',
+                        // Luôn dùng Price hiện tại của course để giá checkout khớp database và Stripe.
+                        price: course.stripePriceId,
                         quantity: 1,
                     },
                 ],

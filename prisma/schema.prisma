@@ -118,7 +118,8 @@ model Course {
   chapters    Chapter[]
   enrollments Enrollment[]
 
-  stripePriceId String @unique
+  stripePriceId   String @unique
+  stripeProductId String @unique
 
   @@map("course")
 }

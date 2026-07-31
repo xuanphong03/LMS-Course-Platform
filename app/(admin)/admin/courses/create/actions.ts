@@ -62,6 +62,7 @@ export async function createCourse(formData: CourseFormDataType): Promise<ApiRes
                 ...validation.data,
                 userId: session?.user?.id as string,
                 stripePriceId: data.default_price as string,
+                stripeProductId: data.id as string,
             },
         })
 
