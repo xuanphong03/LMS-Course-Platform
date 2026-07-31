@@ -4,8 +4,11 @@ import { requireAdmin } from '@/app/data/admin/require-admin'
 import { ROUTES } from '@/consts/routes'
 import arcjet, { fixedWindow } from '@/lib/arcjet'
 import { prisma } from '@/lib/db'
+import { env } from '@/lib/env'
+import { S3 } from '@/lib/S3Client'
 import { stripe } from '@/lib/stripe'
 import { ApiResponse } from '@/lib/types'
+import { DeleteObjectCommand } from '@aws-sdk/client-s3'
 import { revalidatePath } from 'next/cache'
 import { request } from '@arcjet/next'
 
@@ -61,6 +64,7 @@ export async function deleteCourse({ courseId }: DeleteCourseType): Promise<ApiR
             },
             select: {
                 id: true,
+                fileKey: true,
                 stripePriceId: true,
                 stripeProductId: true,
             },
@@ -71,6 +75,16 @@ export async function deleteCourse({ courseId }: DeleteCourseType): Promise<ApiR
                 status: 'error',
                 message: 'Course not found',
             }
+        }
+
+        // Xóa thumbnail theo fileKey trước khi xóa Course để tránh object mồ côi trên Tigris.
+        if (course.fileKey) {
+            await S3.send(
+                new DeleteObjectCommand({
+                    Bucket: env.NEXT_PUBLIC_S3_BUCKET_NAME_IMAGES,
+                    Key: course.fileKey,
+                }),
+            )
         }
 
         // Price cũ được deactivate trước để không còn được dùng trong checkout mới trước khi xóa Product.
@@ -93,12 +107,25 @@ export async function deleteCourse({ courseId }: DeleteCourseType): Promise<ApiR
                 await stripe.products.del(course.stripeProductId)
             }
         } catch (error) {
-            // Product có thể ở khác Stripe mode hoặc đã bị xóa; không giữ lại course chỉ vì cleanup thất bại.
+            // Product còn Price liên kết không thể xóa qua Stripe API. Archive là fallback bắt buộc
+            // để Product không còn bán được nhưng lịch sử thanh toán vẫn được bảo toàn.
             console.error('Failed to delete Stripe Product while deleting course', {
                 courseId: course.id,
                 stripeProductId: course.stripeProductId,
                 error,
             })
+
+            if (course.stripeProductId) {
+                try {
+                    await stripe.products.update(course.stripeProductId, { active: false })
+                } catch (archiveError) {
+                    console.error('Failed to archive Stripe Product while deleting course', {
+                        courseId: course.id,
+                        stripeProductId: course.stripeProductId,
+                        error: archiveError,
+                    })
+                }
+            }
         }
 
         // Database cascade đã xóa toàn bộ chapter, lesson và enrollment liên quan theo course.
