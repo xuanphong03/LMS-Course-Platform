@@ -14,9 +14,9 @@ export default function AdminCourseEmpty() {
                 src='/images/empty-image.png'
                 className='mx-auto h-auto w-140'
             />
-            <div className='absolute top-80 left-1/2 -translate-x-1/2'>
+            <div className='absolute top-1/2 left-1/2 -translate-1/2 p-2 backdrop-blur-[1px]'>
                 <div className='flex flex-col items-center space-y-2'>
-                    <p className='text-2xl font-medium'>No courses available</p>
+                    <p className='text-2xl font-bold uppercase'>No courses available</p>
                     <p className='text-foreground text-sm'>
                         There are currently no courses created. Please create a new course to get started!
                     </p>

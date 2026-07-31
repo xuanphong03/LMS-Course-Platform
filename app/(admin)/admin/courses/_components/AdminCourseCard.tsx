@@ -42,11 +42,11 @@ export default function AdminCourseCard({ data, className }: iAppProps) {
                             <Button
                                 size='icon'
                                 variant='secondary'
-                            >
-                                <MoreVerticalIcon className='size-4' />
-                            </Button>
+                            />
                         }
-                    />
+                    >
+                        <MoreVerticalIcon className='size-4' />
+                    </DropdownMenuTrigger>
                     <DropdownMenuContent
                         align='end'
                         className='w-40'
