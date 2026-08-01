@@ -1,3 +1,4 @@
+import 'server-only'
 import { ROUTES } from '@/consts/routes'
 import { auth } from '@/lib/auth'
 import { headers } from 'next/headers'
