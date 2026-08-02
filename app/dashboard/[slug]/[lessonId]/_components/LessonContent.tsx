@@ -11,10 +11,10 @@ import { CheckCircleIcon } from 'lucide-react'
 import { useTransition } from 'react'
 import { toast } from 'sonner'
 
-interface CourseContentProps {
+interface LessonContentProps {
     data: LessonContentType
 }
-export default function CourseContent({ data }: CourseContentProps) {
+export default function LessonContent({ data }: LessonContentProps) {
     const { triggerConfetti } = useConfetti()
     const [pending, startTransition] = useTransition()
 

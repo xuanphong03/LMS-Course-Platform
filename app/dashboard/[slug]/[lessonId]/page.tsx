@@ -1,5 +1,5 @@
-import CourseContent from '@/app/dashboard/[slug]/[lessonId]/_components/CourseContent'
-import LessonSkeleton from '@/app/dashboard/[slug]/[lessonId]/_components/LessonSkeleton'
+import LessonContent from '@/app/dashboard/[slug]/[lessonId]/_components/LessonContent'
+import LessonContentSkeleton from '@/app/dashboard/[slug]/[lessonId]/_components/LessonContentSkeleton'
 import { getLessonContent } from '@/app/data/course/get-lesson-content'
 import { Suspense } from 'react'
 
@@ -10,7 +10,7 @@ export default async function LessonContentPage({ params }: LessonContentProps) 
     const { lessonId } = await params
 
     return (
-        <Suspense fallback={<LessonSkeleton />}>
+        <Suspense fallback={<LessonContentSkeleton />}>
             <LessonContentLoader lessonId={lessonId} />
         </Suspense>
     )
@@ -18,5 +18,5 @@ export default async function LessonContentPage({ params }: LessonContentProps) 
 
 async function LessonContentLoader({ lessonId }: { lessonId: string }) {
     const data = await getLessonContent({ lessonId })
-    return <CourseContent data={data} />
+    return <LessonContent data={data} />
 }
