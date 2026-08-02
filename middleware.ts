@@ -1,15 +1,15 @@
 import { env } from '@/lib/env'
-import arcjet, { createMiddleware, detectBot } from '@arcjet/next'
+import arcjet, { createMiddleware } from '@arcjet/next'
 import { getSessionCookie } from 'better-auth/cookies'
 import { NextRequest, NextResponse } from 'next/server'
 
 const aj = arcjet({
     key: env.ARCJET_KEY,
     rules: [
-        detectBot({
-            mode: 'LIVE',
-            allow: ['CATEGORY:SEARCH_ENGINE', 'CATEGORY:MONITOR', 'CATEGORY:PREVIEW', 'STRIPE_WEBHOOK'],
-        }),
+        // detectBot({
+        //     mode: 'LIVE',
+        //     allow: ['CATEGORY:SEARCH_ENGINE', 'CATEGORY:MONITOR', 'CATEGORY:PREVIEW', 'STRIPE_WEBHOOK'],
+        // }),
     ],
 })
 
