@@ -15,4 +15,5 @@ export const ROUTES = {
     PUBLIC_COURSE_DETAIL: (courseSlug: string) => `/courses/${courseSlug}`,
     USER_DASHBOARD: '/dashboard',
     USER_DASHBOARD_COURSE_DETAIL: (courseSlug: string) => `/dashboard/${courseSlug}`,
+    USER_DASHBOARD_LESSON_DETAIL: (courseSlug: string, lessonId: string) => `/dashboard/${courseSlug}/${lessonId}`,
 }

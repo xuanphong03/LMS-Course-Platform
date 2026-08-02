@@ -26,9 +26,23 @@ export async function getEnrolledCourses() {
                     chapters: {
                         select: {
                             id: true,
+                            title: true,
+                            position: true,
                             lessons: {
                                 select: {
                                     id: true,
+                                    title: true,
+                                    position: true,
+                                    lessonProgress: {
+                                        where: {
+                                            userId: session.user.id,
+                                        },
+                                        select: {
+                                            id: true,
+                                            lessonId: true,
+                                            completed: true,
+                                        },
+                                    },
                                 },
                             },
                         },

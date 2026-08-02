@@ -1,22 +1,25 @@
-import { PublicCourseType } from '@/app/data/course/get-all-courses'
+'use client'
+import { EnrolledCourseType } from '@/app/data/user/get-enrolled-courses'
 import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ROUTES } from '@/consts/routes'
 import { useConstruct } from '@/hooks/use-construct'
+import useCourseProgress from '@/hooks/use-course-progress'
 import { cn } from '@/lib/utils'
-import { SchoolIcon, TimerIcon } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 
-interface DashboardCourseCardProps {
-    data: PublicCourseType
+interface CourseProgressCardProps {
+    data: EnrolledCourseType['course']
     className?: string
 }
 
-export default function DashboardCourseCard({ data, className }: DashboardCourseCardProps) {
+export default function CourseProgressCard({ data, className }: CourseProgressCardProps) {
     const thumbnailUrl = useConstruct(data.fileKey) ?? ''
+    const { totalLessons, completedLessons, progressPercentage } = useCourseProgress({ courseData: data })
 
     return (
         <article className={cn('group', className)}>
@@ -48,15 +51,19 @@ export default function DashboardCourseCard({ data, className }: DashboardCourse
                         <p className='text-muted-foreground mt-2 line-clamp-2 text-sm leading-tight'>
                             {data?.shortDescription}
                         </p>
-                        <div className='mt-4 flex items-center gap-x-5'>
-                            <div className='flex items-center gap-x-2'>
-                                <TimerIcon className='text-primary bg-primary/10 size-6 rounded-md p-1' />
-                                <p className='text-muted-foreground text-sm'>{data.duration}h</p>
+
+                        <div className='mt-5 space-y-4'>
+                            <div className='mb-1 flex items-center justify-between text-sm'>
+                                <span>Progress:</span>
+                                <p className='font-medium'>{progressPercentage}%</p>
                             </div>
-                            <div className='flex items-center gap-x-2'>
-                                <SchoolIcon className='text-primary bg-primary/10 size-6 rounded-md p-1' />
-                                <p className='text-muted-foreground text-sm'>{data.category}</p>
-                            </div>
+                            <Progress
+                                value={progressPercentage}
+                                className='h-1.5'
+                            />
+                            <p className='text-muted-foreground text-xs'>
+                                {completedLessons} of {totalLessons} lessons completed
+                            </p>
                         </div>
                     </div>
                     <Link
