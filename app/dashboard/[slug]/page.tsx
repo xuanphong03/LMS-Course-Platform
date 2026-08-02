@@ -1,6 +1,12 @@
 import { getCourseSidebarData } from '@/app/data/course/get-course-sidebar-data'
 import { ROUTES } from '@/consts/routes'
+import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
+
+export const metadata: Metadata = {
+    title: 'Course Overview',
+    description: 'Open a course lesson and continue your learning journey.',
+}
 
 interface DashboardCourseDetailProps {
     params: Promise<{ slug: string }>

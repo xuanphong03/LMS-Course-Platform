@@ -1,5 +1,11 @@
 import CourseSidebar from '@/app/dashboard/[slug]/_components/CourseSidebar'
 import { getCourseSidebarData } from '@/app/data/course/get-course-sidebar-data'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+    title: 'Course Learning',
+    description: 'Learn at your own pace and track your progress through the course lessons.',
+}
 
 interface DashboardCourseDetailLayoutProps {
     params: Promise<{ slug: string }>

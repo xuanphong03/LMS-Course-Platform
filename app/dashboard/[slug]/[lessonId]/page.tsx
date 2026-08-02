@@ -1,7 +1,13 @@
 import LessonContent from '@/app/dashboard/[slug]/[lessonId]/_components/LessonContent'
 import LessonContentSkeleton from '@/app/dashboard/[slug]/[lessonId]/_components/LessonContentSkeleton'
 import { getLessonContent } from '@/app/data/course/get-lesson-content'
+import type { Metadata } from 'next'
 import { Suspense } from 'react'
+
+export const metadata: Metadata = {
+    title: 'Lesson',
+    description: 'Watch the lesson video and review its learning content.',
+}
 
 interface LessonContentProps {
     params: Promise<{ lessonId: string }>

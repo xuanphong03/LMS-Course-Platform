@@ -2,6 +2,12 @@ import SectionEnrolledCourses from '@/app/dashboard/_components/SectionEnrolledC
 import SectionUnenrolledCourses from '@/app/dashboard/_components/SectionUnenrolledCourses'
 import { getAllCourses } from '@/app/data/course/get-all-courses'
 import { getEnrolledCourses } from '@/app/data/user/get-enrolled-courses'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+    title: 'My Learning Dashboard',
+    description: 'View your enrolled courses and discover new learning opportunities.',
+}
 
 export default async function DashboardPage() {
     const [allCourses, enrolledCourses] = await Promise.all([getAllCourses(), getEnrolledCourses()])
