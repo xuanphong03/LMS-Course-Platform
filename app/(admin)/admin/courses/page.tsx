@@ -5,9 +5,9 @@ import { ROUTES } from '@/consts/routes'
 import { buttonVariants } from '@/components/ui/button'
 import { adminGetCourses } from '@/app/data/admin/admin-get-courses'
 import AdminCourseList from '@/app/(admin)/admin/courses/_components/AdminCourseList'
-import AdminCourseEmpty from '@/app/(admin)/admin/courses/_components/AdminCourseEmpty'
 import { Suspense } from 'react'
 import AdminCourseSkeletonLayout from '@/app/(admin)/admin/courses/_components/AdminCourseSkeletonLayout'
+import EmptyCourseLayout from '@/app/_components/EmptyCourseLayout'
 
 export const metadata: Metadata = {
     title: 'Course Management',
@@ -36,5 +36,18 @@ export default function CoursesPage() {
 async function RenderCourses() {
     const data = await adminGetCourses()
 
-    return <>{data?.length === 0 ? <AdminCourseEmpty /> : <AdminCourseList data={data} />}</>
+    return (
+        <>
+            {!data?.length ? (
+                <EmptyCourseLayout
+                    title='No courses available'
+                    description='There are currently no courses created. Please create a new course to get started!'
+                    buttonText='Create Course'
+                    buttonLink={ROUTES.ADMIN_COURSES_CREATE}
+                />
+            ) : (
+                <AdminCourseList data={data} />
+            )}
+        </>
+    )
 }

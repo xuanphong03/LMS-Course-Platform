@@ -9,9 +9,10 @@ export const ROUTES = {
     ADMIN_COURSES_EDIT: (courseId: string) => `/admin/courses/${courseId}/edit`,
     ADMIN_COURSES_DELETE: (courseId: string) => `/admin/courses/${courseId}/delete`,
     FORBIDDEN: '/forbidden',
-    DASHBOARD_LESSONS_EDIT: (courseId: string, chapterId: string, lessonId: string) =>
+    ADMIN_LESSONS_EDIT: (courseId: string, chapterId: string, lessonId: string) =>
         `/admin/courses/${courseId}/${chapterId}/${lessonId}`,
     PUBLIC_COURSES: '/courses',
     PUBLIC_COURSE_DETAIL: (courseSlug: string) => `/courses/${courseSlug}`,
     USER_DASHBOARD: '/dashboard',
+    USER_DASHBOARD_COURSE_DETAIL: (courseSlug: string) => `/dashboard/${courseSlug}`,
 }

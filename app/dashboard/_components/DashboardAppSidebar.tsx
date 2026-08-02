@@ -16,10 +16,6 @@ import {
 } from '@/components/ui/sidebar'
 import {
     LayoutDashboardIcon,
-    ListIcon,
-    ChartBarIcon,
-    FolderIcon,
-    UsersIcon,
     CameraIcon,
     FileTextIcon,
     Settings2Icon,
@@ -34,28 +30,8 @@ const data = {
     navMain: [
         {
             title: 'Dashboard',
-            url: ROUTES.ADMIN,
+            url: ROUTES.USER_DASHBOARD,
             icon: <LayoutDashboardIcon />,
-        },
-        {
-            title: 'Courses',
-            url: ROUTES.ADMIN_COURSES,
-            icon: <ListIcon />,
-        },
-        {
-            title: 'Analytics',
-            url: '#',
-            icon: <ChartBarIcon />,
-        },
-        {
-            title: 'Projects',
-            url: '#',
-            icon: <FolderIcon />,
-        },
-        {
-            title: 'Team',
-            url: '#',
-            icon: <UsersIcon />,
         },
     ],
     navClouds: [
@@ -124,7 +100,7 @@ const data = {
         },
     ],
 }
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function DashboardAppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     return (
         <Sidebar
             collapsible='offcanvas'

@@ -61,7 +61,7 @@ export default function LessonGroup({ courseId, chapter, isDragDisabled }: Lesso
                                     <GripVerticalIcon className='size-4' />
                                 </Button>
                                 <FileTextIcon className='size-4' />
-                                <Link href={ROUTES.DASHBOARD_LESSONS_EDIT(courseId, chapter.id, lessonItem.id)}>
+                                <Link href={ROUTES.ADMIN_LESSONS_EDIT(courseId, chapter.id, lessonItem.id)}>
                                     {lessonItem.title}
                                 </Link>
                             </div>

@@ -1,6 +1,6 @@
 import AdminCourseCard from '@/app/(admin)/admin/courses/_components/AdminCourseCard'
-import AdminCourseEmpty from '@/app/(admin)/admin/courses/_components/AdminCourseEmpty'
 import { AdminCourseSkeletonCard } from '@/app/(admin)/admin/courses/_components/AdminCourseSkeletonLayout'
+import EmptyCourseLayout from '@/app/_components/EmptyCourseLayout'
 import { adminGetDashboardStats } from '@/app/data/admin/admin-get-dashboard-stats'
 import { adminGetEnrollmentStats } from '@/app/data/admin/admin-get-enrollment-stats'
 import { adminGetRecentCourses } from '@/app/data/admin/admin-get-recent-courses'
@@ -46,7 +46,14 @@ async function RenderRecentCourses() {
     const recentCourses = await adminGetRecentCourses()
 
     if (!Array.isArray(recentCourses) || !recentCourses.length) {
-        return <AdminCourseEmpty />
+        return (
+            <EmptyCourseLayout
+                title='No courses available'
+                description='There are currently no courses created. Please create a new course to get started!'
+                buttonText='Create Course'
+                buttonLink={ROUTES.ADMIN_COURSES_CREATE}
+            />
+        )
     }
 
     return (

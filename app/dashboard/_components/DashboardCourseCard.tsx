@@ -10,12 +10,12 @@ import { SchoolIcon, TimerIcon } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 
-interface PublicCourseCardProps {
+interface DashboardCourseCardProps {
     data: PublicCourseType
     className?: string
 }
 
-export default function PublicCourseCard({ data, className }: PublicCourseCardProps) {
+export default function DashboardCourseCard({ data, className }: DashboardCourseCardProps) {
     const thumbnailUrl = useConstruct(data.fileKey) ?? ''
 
     return (
@@ -23,7 +23,7 @@ export default function PublicCourseCard({ data, className }: PublicCourseCardPr
             <Card className='relative h-full gap-0 py-0'>
                 <Badge className='absolute top-2 right-2 z-10'>{data.level}</Badge>
                 <Link
-                    href={ROUTES.PUBLIC_COURSE_DETAIL(data.slug)}
+                    href={ROUTES.USER_DASHBOARD_COURSE_DETAIL(data.slug)}
                     className='relative inline-block aspect-video overflow-hidden rounded-t-xl'
                 >
                     <Image
@@ -40,7 +40,7 @@ export default function PublicCourseCard({ data, className }: PublicCourseCardPr
                         <h4>
                             <Link
                                 className='group-hover:text-primary line-clamp-2 text-lg font-medium transition-colors hover:underline'
-                                href={ROUTES.PUBLIC_COURSE_DETAIL(data.slug)}
+                                href={ROUTES.USER_DASHBOARD_COURSE_DETAIL(data.slug)}
                             >
                                 {data?.title}
                             </Link>
@@ -60,7 +60,7 @@ export default function PublicCourseCard({ data, className }: PublicCourseCardPr
                         </div>
                     </div>
                     <Link
-                        href={ROUTES.PUBLIC_COURSE_DETAIL(data.slug)}
+                        href={ROUTES.USER_DASHBOARD_COURSE_DETAIL(data.slug)}
                         className={buttonVariants({ className: 'mt-4 w-full capitalize' })}
                     >
                         Learn more
@@ -71,7 +71,7 @@ export default function PublicCourseCard({ data, className }: PublicCourseCardPr
     )
 }
 
-export function PublicCourseCardSkeleton() {
+export function DashboardCourseCardSkeleton() {
     return (
         <Card className='group relative gap-0 py-0'>
             <div className='absolute top-2 right-2 z-10 flex items-center'>

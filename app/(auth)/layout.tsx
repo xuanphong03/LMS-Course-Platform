@@ -3,6 +3,7 @@ import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import React from 'react'
 import type { Metadata } from 'next'
+import { ROUTES } from '@/consts/routes'
 
 export const metadata: Metadata = {
     title: 'Authentication',
@@ -17,7 +18,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     return (
         <div className='relative flex min-h-svh w-full flex-col items-center justify-center'>
             <Link
-                href='/'
+                href={ROUTES.HOME}
                 className={buttonVariants({
                     variant: 'outline',
                     className: 'absolute top-4 left-4',
@@ -28,7 +29,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             </Link>
             <div className='flex w-full max-w-sm flex-col gap-6'>
                 <Link
-                    href='/'
+                    href={ROUTES.HOME}
                     className='flex items-center gap-2 self-center font-medium'
                 >
                     LMS Course Platform
