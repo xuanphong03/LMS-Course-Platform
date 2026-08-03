@@ -56,7 +56,7 @@ export function HeroSection() {
                     <div className='mt-12 flex flex-wrap gap-3'>
                         <div>
                             <p className='text-foreground/90 border-border/60 bg-background/55 dark:bg-background/80 rounded-full border px-4 py-2 text-sm font-medium shadow-sm backdrop-blur-sm'>
-                                  Learn anywhere
+                                Learn anywhere
                             </p>
                         </div>
                         <div>
