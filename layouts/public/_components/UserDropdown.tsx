@@ -50,7 +50,7 @@ const dropdownMenuItems: DropdownMenuItem[] = [
 
 export function UserDropdown({ name, avatar, email }: UserDropdownProps) {
     const { signOutPending, handleSignOut } = useSignout()
-    const userName = name ?? email.split('@')
+
     return (
         <DropdownMenu>
             <DropdownMenuTrigger
@@ -63,9 +63,9 @@ export function UserDropdown({ name, avatar, email }: UserDropdownProps) {
                         <Avatar>
                             <AvatarImage
                                 src={avatar || ''}
-                                alt={userName}
+                                alt={name}
                             />
-                            <AvatarFallback>{userName[0].toUpperCase()}</AvatarFallback>
+                            <AvatarFallback>{name[0].toUpperCase()}</AvatarFallback>
                         </Avatar>
                     </Button>
                 }
