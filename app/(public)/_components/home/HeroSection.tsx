@@ -1,9 +1,9 @@
 import { buttonVariants } from '@/components/ui/button'
 import { ROUTES } from '@/consts/routes'
 import { ArrowRight, PlayCircle } from 'lucide-react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { AnimatedHeroHeading } from './AnimatedHeroHeading'
+import { HeroVisual } from './HeroVisual'
 
 /**
  * Hero giới thiệu giá trị cốt lõi của nền tảng trước khi người dùng phải
@@ -12,22 +12,13 @@ import { AnimatedHeroHeading } from './AnimatedHeroHeading'
 export function HeroSection() {
     return (
         <section className='bg-muted/20 relative isolate px-4 pt-4 sm:px-6 sm:pt-10'>
-            <div className='sm:animate-in sm:fade-in sm:zoom-in-95 relative mx-auto flex min-h-155 max-w-340 items-center overflow-hidden rounded-4xl border border-border/60 bg-background shadow-[0_24px_80px_-32px_var(--primary)] sm:min-h-175 sm:duration-1000 lg:min-h-190'>
-                <Image
-                    src='/images/homepage/hero-section/background.png'
-                    alt='Student learning online with LMS Course Platform'
-                    fill
-                    quality={100}
-                    priority
-                    sizes='(max-width: 640px) 100vw, 1400px'
-                    className='z-0 object-cover object-[68%_center] opacity-90 dark:brightness-[1.02] dark:contrast-[1.02] dark:opacity-100 dark:saturate-[0.92] sm:object-center'
-                />
-                <div className='from-background/95 via-background/85 to-background/35 pointer-events-none absolute inset-0 z-10 bg-linear-to-b dark:from-background/95 dark:via-background/70 dark:to-transparent sm:hidden' />
-                <div className='from-background via-background/90 to-background/10 pointer-events-none absolute inset-0 z-10 hidden bg-linear-to-r dark:from-background/95 dark:via-background/55 dark:to-background/10 sm:block' />
-                <div className='bg-primary/15 pointer-events-none absolute -top-40 -left-24 z-10 size-96 rounded-full blur-3xl' />
-                <div className='from-primary/10 pointer-events-none absolute right-0 bottom-0 z-10 size-80 rounded-full bg-linear-to-t to-transparent blur-2xl' />
+            <div className='sm:animate-in sm:fade-in sm:zoom-in-95 from-background via-primary/5 to-accent/10 border-border/60 dark:via-primary/10 dark:to-accent/5 relative mx-auto flex min-h-155 max-w-340 items-center overflow-hidden rounded-4xl border bg-linear-to-br shadow-[0_24px_80px_-32px_var(--primary)] sm:min-h-175 sm:duration-1000 lg:min-h-190'>
+                <HeroVisual />
+                <div className='from-background/95 via-background/85 dark:from-background/95 dark:via-background/72 dark:to-background/10 pointer-events-none absolute inset-0 z-10 bg-linear-to-r to-transparent' />
+                <div className='bg-primary/15 dark:bg-primary/20 pointer-events-none absolute -top-40 -left-24 z-10 size-96 rounded-full blur-3xl' />
+                <div className='from-primary/10 dark:from-primary/20 pointer-events-none absolute right-0 bottom-0 z-10 size-80 rounded-full bg-linear-to-t to-transparent blur-2xl' />
                 <div className='relative z-20 max-w-2xl px-6 pt-8 pb-16 sm:px-12 sm:pt-28 sm:pb-20 lg:px-16'>
-                    <div className='bg-background/70 text-primary border-primary/15 mb-6 inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-medium shadow-sm backdrop-blur-sm dark:bg-background/85'>
+                    <div className='bg-background/70 text-primary border-primary/15 dark:bg-background/85 mb-6 inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-medium shadow-sm backdrop-blur-sm'>
                         <span className='relative'>
                             <span className='bg-primary absolute-center z-1 block size-2.5 animate-ping rounded-full' />
                             <span className='bg-primary absolute-center z-2 block size-2 rounded-full' />
@@ -64,17 +55,17 @@ export function HeroSection() {
                     </div>
                     <div className='mt-12 flex flex-wrap gap-3'>
                         <div>
-                            <p className='text-foreground/90 border-border/60 bg-background/55 rounded-full border px-4 py-2 text-sm font-medium shadow-sm backdrop-blur-sm dark:bg-background/80'>
-                                Learn anywhere
+                            <p className='text-foreground/90 border-border/60 bg-background/55 dark:bg-background/80 rounded-full border px-4 py-2 text-sm font-medium shadow-sm backdrop-blur-sm'>
+                                  Learn anywhere
                             </p>
                         </div>
                         <div>
-                            <p className='text-foreground/90 border-border/60 bg-background/55 rounded-full border px-4 py-2 text-sm font-medium shadow-sm backdrop-blur-sm dark:bg-background/80'>
+                            <p className='text-foreground/90 border-border/60 bg-background/55 dark:bg-background/80 rounded-full border px-4 py-2 text-sm font-medium shadow-sm backdrop-blur-sm'>
                                 Expert-led
                             </p>
                         </div>
                         <div>
-                            <p className='text-foreground/90 border-border/60 bg-background/55 rounded-full border px-4 py-2 text-sm font-medium shadow-sm backdrop-blur-sm dark:bg-background/80'>
+                            <p className='text-foreground/90 border-border/60 bg-background/55 dark:bg-background/80 rounded-full border px-4 py-2 text-sm font-medium shadow-sm backdrop-blur-sm'>
                                 Certificate included
                             </p>
                         </div>
