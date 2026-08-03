@@ -14,7 +14,7 @@ export function HeroSection() {
         <section className='bg-muted/20 relative isolate px-4 pt-4 sm:px-6 sm:pt-10'>
             <div className='sm:animate-in sm:fade-in sm:zoom-in-95 from-background via-primary/5 to-accent/10 border-border/60 dark:via-primary/10 dark:to-accent/5 relative mx-auto flex min-h-155 max-w-340 items-center overflow-hidden rounded-4xl border bg-linear-to-br shadow-[0_24px_80px_-32px_var(--primary)] sm:min-h-175 sm:duration-1000 lg:min-h-190'>
                 <HeroVisual />
-                <div className='from-background/95 via-background/85 dark:from-background/95 dark:via-background/72 dark:to-background/10 pointer-events-none absolute inset-0 z-10 bg-linear-to-r to-transparent' />
+                {/* <div className='from-background/95 via-background/85 dark:from-background/95 dark:via-background/72 dark:to-background/10 pointer-events-none absolute inset-0 z-10 bg-linear-to-r to-transparent' /> */}
                 <div className='bg-primary/15 dark:bg-primary/20 pointer-events-none absolute -top-40 -left-24 z-10 size-96 rounded-full blur-3xl' />
                 <div className='from-primary/10 dark:from-primary/20 pointer-events-none absolute right-0 bottom-0 z-10 size-80 rounded-full bg-linear-to-t to-transparent blur-2xl' />
                 <div className='relative z-20 max-w-2xl px-6 pt-8 pb-16 sm:px-12 sm:pt-28 sm:pb-20 lg:px-16'>
