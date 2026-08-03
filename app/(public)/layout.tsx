@@ -1,4 +1,5 @@
 import Header from '@/layouts/public/Header'
+import Footer from '@/layouts/public/Footer'
 
 export default function PublicLayout({
     children,
@@ -9,6 +10,7 @@ export default function PublicLayout({
         <>
             <Header />
             {children}
+            <Footer />
         </>
     )
 }
