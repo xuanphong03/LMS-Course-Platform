@@ -2,7 +2,6 @@
 
 import BorderGlow from '@/components/react-bits/BorderGlow'
 import { BookOpenCheck, Layers3, Sparkles, Target } from 'lucide-react'
-import { useTheme } from 'next-themes'
 
 const valueProps = [
     {
@@ -28,7 +27,6 @@ const valueProps = [
 ] as const
 
 export default function ValueList() {
-    const { resolvedTheme } = useTheme()
     return (
         <div className='relative mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4'>
             {valueProps.map(({ icon: Icon, title, description }, index) => (
@@ -41,7 +39,7 @@ export default function ValueList() {
                     glowIntensity={1}
                     coneSpread={25}
                     animated={true}
-                    backgroundColor={resolvedTheme === 'light' ? '#ffffff' : '#15131d'}
+                    backgroundColor='var(--card)'
                     colors={['#c084fc', '#f472b6', '#38bdf8']}
                 >
                     <article className='relative h-full w-full p-6'>
