@@ -27,7 +27,7 @@ const defaultNavigationItems: NavigationItemProps[] = [
 
 export default function Header() {
     const { data: session, isPending } = authClient.useSession()
-    const userName = session?.user.name ?? session?.user.email.split('@')[0]
+    const userName = session?.user?.name?.trim() || session?.user?.email?.split('@')[0] || 'User'
 
     const navigationItems = useMemo<NavigationItemProps[]>(() => {
         if (session?.user.role !== 'admin') {
