@@ -5,7 +5,7 @@ import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 
 export const metadata: Metadata = {
-    title: 'Trang đăng nhập',
+    title: 'Sign in',
     description: 'Sign in to LMS Course Platform to continue learning.',
 }
 

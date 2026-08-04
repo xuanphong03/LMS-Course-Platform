@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/button'
 import { authClient } from '@/lib/auth-client'
+import { IconBrandGithub } from '@tabler/icons-react'
 import { Loader } from 'lucide-react'
 import { useTransition } from 'react'
 import { toast } from 'sonner'
@@ -26,23 +27,22 @@ export default function SignInByGithub() {
         })
     }
     return (
-        <div className='flex flex-col gap-4'>
-            <div className='text-center'>Login with your Github or Email Account</div>
-
-            <Button
-                disabled={githubPending}
-                className='w-full'
-                variant='outline'
-                onClick={signInWithGithub}
-            >
-                {githubPending ? (
-                    <>
-                        <Loader className='size-4 animate-spin' /> <span>Loading...</span>
-                    </>
-                ) : (
-                    'Continue with Github'
-                )}
-            </Button>
-        </div>
+        <Button
+            disabled={githubPending}
+            className='h-11 w-full rounded-xl'
+            variant='outline'
+            onClick={signInWithGithub}
+        >
+            {githubPending ? (
+                <>
+                    <Loader className='size-4 animate-spin' /> <span>Connecting...</span>
+                </>
+            ) : (
+                <>
+                    <IconBrandGithub className='size-4' />
+                    Continue with GitHub
+                </>
+            )}
+        </Button>
     )
 }

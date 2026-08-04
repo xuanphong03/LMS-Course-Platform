@@ -1,4 +1,5 @@
 import { DashboardAppSidebar } from '@/app/dashboard/_components/DashboardAppSidebar'
+import { requireUser } from '@/app/data/user/require-user'
 import { SiteHeader } from '@/components/sidebar/site-header'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 
@@ -13,11 +14,15 @@ export const metadata: Metadata = {
     },
 }
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
     children,
 }: Readonly<{
     children: React.ReactNode
 }>) {
+    // Bảo vệ ở Server Component để request không có session không thể render dashboard,
+    // kể cả khi middleware bị bỏ qua hoặc cookie chỉ là trạng thái tạm thời.
+    await requireUser()
+
     return (
         <SidebarProvider
             style={

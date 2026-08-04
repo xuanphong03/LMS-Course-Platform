@@ -19,7 +19,6 @@ export default async function DashboardPage() {
 
     return (
         <>
-            <h1 className='sr-only'>My Learning Dashboard</h1>
             <SectionEnrolledCourses data={enrolledCourses} />
             <SectionUnenrolledCourses data={unenrolledCourses} />
         </>

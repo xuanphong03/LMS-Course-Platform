@@ -14,26 +14,41 @@ import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/c
 import { ROUTES } from '@/consts/routes'
 import useSignout from '@/hooks/use-signout'
 import { authClient } from '@/lib/auth-client'
-import { EllipsisVerticalIcon, LogOutIcon, HomeIcon, LayoutDashboardIcon, Tv2Icon } from 'lucide-react'
+import { EllipsisVerticalIcon, LogOutIcon, HomeIcon, LayoutDashboardIcon, Tv2Icon, ShieldCheckIcon } from 'lucide-react'
 import Link from 'next/link'
-import { ReactNode } from 'react'
+import { ReactNode, useMemo } from 'react'
 
-interface DropdownItem {
+interface DropdownItemProps {
     icon: ReactNode
     name: string
     href: string
 }
 
-const dropdownItems: DropdownItem[] = [
+const defaultDropdownItems: DropdownItemProps[] = [
     { icon: <HomeIcon />, name: 'Homepage', href: ROUTES.HOME },
-    { icon: <LayoutDashboardIcon />, name: 'Dashboard', href: ROUTES.ADMIN },
     { icon: <Tv2Icon />, name: 'Courses', href: ROUTES.ADMIN_COURSES },
+    { icon: <LayoutDashboardIcon />, name: 'User Dashboard', href: ROUTES.ADMIN },
 ]
 
 export function NavUser() {
     const { isMobile } = useSidebar()
     const { data: session, isPending } = authClient.useSession()
     const { signOutPending, handleSignOut } = useSignout()
+
+    const dropdownItems = useMemo<DropdownItemProps[]>(() => {
+        if (session?.user.role !== 'admin') {
+            return defaultDropdownItems
+        }
+
+        return [
+            ...defaultDropdownItems,
+            {
+                name: 'Admin Dashboard',
+                href: ROUTES.ADMIN,
+                icon: <ShieldCheckIcon className='size-4' />,
+            },
+        ]
+    }, [session?.user.role])
 
     if (isPending) return null
 

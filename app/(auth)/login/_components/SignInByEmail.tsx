@@ -33,17 +33,18 @@ export default function SignInByEmail() {
 
     return (
         <div className='flex flex-col gap-4'>
-            <div className='after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t'>
-                <span className='bg-card relative z-10 px-4'>Or continue with email</span>
+            <div className='after:border-border relative text-center text-xs after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t'>
+                <span className='bg-card text-muted-foreground relative z-10 px-4'>or use your email</span>
             </div>
 
             <div className='flex flex-col gap-3'>
                 <div className='flex flex-col gap-2'>
-                    <Label htmlFor='email'>Email</Label>
+                    <Label htmlFor='email'>Email address</Label>
                     <Input
                         type='email'
                         name='email'
-                        placeholder='example@gmail.com'
+                        placeholder='you@example.com'
+                        className='bg-background/60 h-11 rounded-xl'
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                     />
@@ -51,6 +52,7 @@ export default function SignInByEmail() {
                 <Button
                     onClick={signInWithEmail}
                     disabled={emailPending || !email}
+                    className='h-11 w-full rounded-xl'
                 >
                     {emailPending ? (
                         <>

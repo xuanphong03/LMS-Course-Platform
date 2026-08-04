@@ -7,6 +7,7 @@ import { authClient } from '@/lib/auth-client'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import { Loader } from 'lucide-react'
+import { ROUTES } from '@/consts/routes'
 
 export default function FormVerifyRequest() {
     const router = useRouter()
@@ -26,7 +27,7 @@ export default function FormVerifyRequest() {
                     onSuccess: () => {
                         // Handle success, e.g., redirect to a success page or show a success message
                         toast.success('Email verified successfully! You will be redirected to the home page.')
-                        router.push('/')
+                        router.push(ROUTES.HOME)
                     },
                     onError: () => {
                         // Handle error, e.g., show an error message
