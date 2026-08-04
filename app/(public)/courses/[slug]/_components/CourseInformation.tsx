@@ -63,21 +63,21 @@ export default function CourseInformation({ course }: CourseInformationProps) {
                     </div>
                 )}
             </div>
-
-            <div className='mt-12 space-y-6'>
-                <div className='flex items-center justify-between'>
-                    <h2 className='text-3xl font-semibold tracking-tight capitalize'>Course content</h2>
-                    <div className='flex items-center space-x-2'>
-                        <span>
-                            {totalCourses} {totalCourses > 1 ? 'Chapters' : 'Chapter'}
-                        </span>
-                        <span>|</span>
-                        <span>
-                            {totalLessons} {totalCourses > 1 ? 'Lessons' : 'Lesson'}
-                        </span>
+            {Array.isArray(course?.chapters) && course?.chapters?.length ? (
+                <div className='mt-12 space-y-6'>
+                    <div className='flex items-center justify-between'>
+                        <h2 className='text-3xl font-semibold tracking-tight capitalize'>Course content</h2>
+                        <div className='flex items-center space-x-2'>
+                            <span>
+                                {totalCourses} {totalCourses > 1 ? 'Chapters' : 'Chapter'}
+                            </span>
+                            <span>|</span>
+                            <span>
+                                {totalLessons} {totalCourses > 1 ? 'Lessons' : 'Lesson'}
+                            </span>
+                        </div>
                     </div>
-                </div>
-                {Array.isArray(course?.chapters) && course?.chapters?.length && (
+
                     <Accordion
                         multiple
                         className='space-y-4'
@@ -149,8 +149,8 @@ export default function CourseInformation({ course }: CourseInformationProps) {
                                 </AccordionItem>
                             ))}
                     </Accordion>
-                )}
-            </div>
+                </div>
+            ) : null}
         </>
     )
 }

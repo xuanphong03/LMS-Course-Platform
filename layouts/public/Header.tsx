@@ -27,7 +27,6 @@ const defaultNavigationItems: NavigationItemProps[] = [
 
 export default function Header() {
     const { data: session, isPending } = authClient.useSession()
-    const userName = session?.user.name ?? session?.user.email.split('@')[0]
 
     const navigationItems = useMemo<NavigationItemProps[]>(() => {
         if (session?.user.role !== 'admin') {
@@ -71,7 +70,7 @@ export default function Header() {
                                 <ThemeToggle />
                                 {isPending ? null : session ? (
                                     <UserDropdown
-                                        name={userName || ''}
+                                        name={session?.user?.name || ''}
                                         email={session?.user?.email}
                                         avatar={session?.user?.image || ''}
                                     />
