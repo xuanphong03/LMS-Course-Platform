@@ -13,6 +13,7 @@ import {
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar'
 import { ROUTES } from '@/consts/routes'
 import useSignout from '@/hooks/use-signout'
+import useUserInitial from '@/hooks/use-user-initial'
 import { authClient } from '@/lib/auth-client'
 import { EllipsisVerticalIcon, LogOutIcon, HomeIcon, LayoutDashboardIcon, Tv2Icon, ShieldCheckIcon } from 'lucide-react'
 import Link from 'next/link'
@@ -34,6 +35,10 @@ export function NavUser() {
     const { isMobile } = useSidebar()
     const { data: session, isPending } = authClient.useSession()
     const { signOutPending, handleSignOut } = useSignout()
+    const userInitial = useUserInitial({
+        name: session?.user?.name,
+        email: session?.user?.email,
+    })
 
     const dropdownItems = useMemo<DropdownItemProps[]>(() => {
         if (session?.user.role !== 'admin') {
@@ -70,9 +75,7 @@ export function NavUser() {
                                 alt={session?.user?.name || ''}
                             />
                             <AvatarFallback className='rounded-lg'>
-                                {session?.user?.name && session?.user?.name?.length > 0
-                                    ? session?.user?.name?.charAt(0)?.toUpperCase()
-                                    : session?.user?.email?.charAt(0)?.toUpperCase()}
+                                <span className='font-bold'>{userInitial}</span>
                             </AvatarFallback>
                         </Avatar>
                         <div className='grid flex-1 text-left text-sm leading-tight'>
@@ -100,9 +103,7 @@ export function NavUser() {
                                             alt={session?.user?.name || ''}
                                         />
                                         <AvatarFallback className='rounded-lg'>
-                                            {session?.user?.name && session?.user?.name?.length > 0
-                                                ? session?.user?.name?.charAt(0)?.toUpperCase()
-                                                : session?.user?.email?.charAt(0)?.toUpperCase()}
+                                            <span className='font-bold'>{userInitial}</span>
                                         </AvatarFallback>
                                     </Avatar>
                                     <div className='grid flex-1 text-left text-sm leading-tight'>

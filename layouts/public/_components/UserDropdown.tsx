@@ -17,6 +17,7 @@ import { ReactNode } from 'react'
 import Link from 'next/link'
 import { ROUTES } from '@/consts/routes'
 import useSignout from '@/hooks/use-signout'
+import useUserInitial from '@/hooks/use-user-initial'
 
 interface UserDropdownProps {
     name: string
@@ -50,6 +51,7 @@ const dropdownMenuItems: DropdownMenuItem[] = [
 
 export function UserDropdown({ name, avatar, email }: UserDropdownProps) {
     const { signOutPending, handleSignOut } = useSignout()
+    const userInitial = useUserInitial({ name, email })
 
     return (
         <DropdownMenu>
@@ -63,9 +65,11 @@ export function UserDropdown({ name, avatar, email }: UserDropdownProps) {
                         <Avatar>
                             <AvatarImage
                                 src={avatar || ''}
-                                alt={name}
+                                alt={name || ''}
                             />
-                            <AvatarFallback>{name[0].toUpperCase()}</AvatarFallback>
+                            <AvatarFallback>
+                                <span className='font-bold'>{userInitial}</span>
+                            </AvatarFallback>
                         </Avatar>
                     </Button>
                 }

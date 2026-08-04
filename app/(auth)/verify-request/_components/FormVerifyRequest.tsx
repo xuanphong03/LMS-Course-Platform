@@ -23,6 +23,7 @@ export default function FormVerifyRequest() {
             await authClient.signIn.emailOtp({
                 email: email,
                 otp: optCode,
+                name: email.split('@')[0],
                 fetchOptions: {
                     onSuccess: () => {
                         // Handle success, e.g., redirect to a success page or show a success message

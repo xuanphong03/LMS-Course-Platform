@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/drawer'
 import { ROUTES } from '@/consts/routes'
 import useSignout from '@/hooks/use-signout'
+import useUserInitial from '@/hooks/use-user-initial'
 import { NavigationItemProps } from '@/layouts/public/Header'
 import { authClient } from '@/lib/auth-client'
 import { LogInIcon, LogOutIcon, MenuIcon } from 'lucide-react'
@@ -27,7 +28,11 @@ export default function MenuMobile({ navigationItems }: MenuMobileProps) {
     const { data: session, isPending } = authClient.useSession()
     const { signOutPending, handleSignOut } = useSignout()
 
-    const userName = session?.user.name ?? session?.user.email.split('@')[0]
+    const userName = session?.user.name?.trim() || session?.user.email?.split('@')[0] || 'User'
+    const userInitial = useUserInitial({
+        name: session?.user.name,
+        email: session?.user.email,
+    })
 
     return (
         <Drawer swipeDirection='right'>
@@ -55,7 +60,9 @@ export default function MenuMobile({ navigationItems }: MenuMobileProps) {
                                         src={session?.user.image || ''}
                                         alt={session?.user.name || ''}
                                     />
-                                    <AvatarFallback>{userName?.[0]?.toUpperCase()}</AvatarFallback>
+                                    <AvatarFallback>
+                                        <span className='font-bold'>{userInitial}</span>
+                                    </AvatarFallback>
                                 </Avatar>
                                 <div className='flex flex-col'>
                                     <span className='text-muted-foreground truncate text-sm font-medium'>
