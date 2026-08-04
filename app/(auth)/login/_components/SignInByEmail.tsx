@@ -44,7 +44,7 @@ export default function SignInByEmail() {
                         type='email'
                         name='email'
                         placeholder='you@example.com'
-                        className='h-11 rounded-xl bg-background/60'
+                        className='bg-background/60 h-11 rounded-xl'
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                     />
