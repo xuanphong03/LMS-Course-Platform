@@ -17,11 +17,14 @@ export const env = createEnv({
         AWS_REGION: z.string().min(1),
         STRIPE_SECRET_KEY: z.string().min(1),
         STRIPE_WEBHOOK_SECRET: z.string().min(1),
+        RESEND_FROM_EMAIL: z.string().min(1),
     },
     client: {
         NEXT_PUBLIC_S3_BUCKET_NAME_IMAGES: z.string().min(1),
+        NEXT_PUBLIC_APP_URL: z.string().min(1),
     },
     experimental__runtimeEnv: {
         NEXT_PUBLIC_S3_BUCKET_NAME_IMAGES: process.env.NEXT_PUBLIC_S3_BUCKET_NAME_IMAGES,
+        NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_S3_BUCKET_NAME_IMAGES,
     },
 })
