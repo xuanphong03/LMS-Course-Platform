@@ -23,9 +23,9 @@ export const auth = betterAuth({
         emailOTP({
             async sendVerificationOTP({ email, otp }) {
                 const { error } = await resend.emails.send({
-                    from: 'LMS Course Platform <onboarding@resend.dev>',
+                    from: env.RESEND_FROM_EMAIL,
                     to: [email],
-                    subject: 'LMS Course Platform - Verify your email',
+                    subject: 'PhHub - Verify your email',
                     react: EmailTemplate({ otp }),
                 })
 
