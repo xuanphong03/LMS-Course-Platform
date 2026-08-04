@@ -1,3 +1,4 @@
+import { requireAdmin } from '@/app/data/admin/require-admin'
 import { AppSidebar } from '@/components/sidebar/app-sidebar'
 import { SiteHeader } from '@/components/sidebar/site-header'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
@@ -13,11 +14,15 @@ export const metadata: Metadata = {
     },
 }
 
-export default function AdminLayout({
+export default async function AdminLayout({
     children,
 }: Readonly<{
     children: React.ReactNode
 }>) {
+    // Bảo vệ ở Server Component để request không có session không thể render admin,
+    // kể cả khi middleware bị bỏ qua hoặc cookie chỉ là trạng thái tạm thời.
+    await requireAdmin()
+
     return (
         <SidebarProvider
             style={

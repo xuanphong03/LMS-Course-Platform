@@ -1,6 +1,6 @@
+import 'server-only'
 import { requireUser } from '@/app/data/user/require-user'
 import { prisma } from '@/lib/db'
-import 'server-only'
 
 export async function getEnrolledCourses() {
     const session = await requireUser()
