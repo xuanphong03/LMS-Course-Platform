@@ -3,125 +3,111 @@ import { PublicCourseDetailType } from '@/app/data/course/get-singular-course'
 import { buttonVariants } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { ROUTES } from '@/consts/routes'
-import { IconBook, IconCategory, IconChartBar, IconClock } from '@tabler/icons-react'
-import { CheckIcon } from 'lucide-react'
+import { IconBook2, IconChartBar, IconCheck, IconClock, IconLock } from '@tabler/icons-react'
 import Link from 'next/link'
 
 interface CourseEnrollmentProps {
-    course: PublicCourseDetailType
+    course: NonNullable<PublicCourseDetailType>
     isEnrolled: boolean
 }
 
-const courseBenefits: { title: string }[] = [
-    { title: 'Full lifetime access' },
-    { title: 'Access on mobile and desktop' },
-    { title: 'Certificate of completion' },
-]
+const courseBenefits = ['Full lifetime access', 'Access on mobile and desktop', 'Certificate of completion']
 
+/**
+ * Giữ CTA thanh toán luôn trong tầm nhìn trên desktop, đồng thời gom giá,
+ * quyền lợi và thông tin tin cậy vào một vùng duy nhất để giảm phân tán quyết định.
+ */
 export default function CourseEnrollment({ course, isEnrolled }: CourseEnrollmentProps) {
-    const totalLessons = course?.chapters?.reduce((total, chapter) => total + (chapter?.lessons?.length || 0), 0) || 0
+    const totalLessons = course.chapters.reduce((total, chapter) => total + chapter.lessons.length, 0)
+    const formattedPrice = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+    }).format(course.price || 0)
 
     return (
-        <div className='sticky top-24'>
-            <Card className='py-0'>
-                <CardContent className='p-6'>
-                    <div className='mb-6 flex items-center justify-between'>
-                        <span className='text-lg font-medium'>Price:</span>
-                        <span className='text-primary text-xl font-bold'>
-                            {new Intl.NumberFormat('en-US', {
-                                style: 'currency',
-                                currency: 'USD',
-                            }).format(course?.price || 0)}
-                        </span>
-                    </div>
-
-                    <div className='bg-muted mb-6 space-y-3 rounded-lg p-4'>
-                        <h4 className='font-medium'> What you will get:</h4>
-
-                        {/* Duration */}
-                        <div className='flex flex-col gap-3'>
-                            <div className='flex items-center gap-3'>
-                                <div className='bg-primary/10 text-primary flex size-8 items-center justify-center rounded-full'>
-                                    <IconClock className='size-4' />
-                                </div>
-                                <div>
-                                    <p className='text-sm font-medium capitalize'>Course duration</p>
-                                    <p className='text-muted-foreground text-sm'>
-                                        {course?.duration} {(course?.duration || 0) > 1 ? 'hours' : 'hour'}
-                                    </p>
-                                </div>
-                            </div>
+        <aside className='lg:sticky lg:top-28'>
+            <Card className='border-primary/20 overflow-hidden rounded-3xl py-0 shadow-xl shadow-primary/10'>
+                <div className='bg-primary h-1.5 w-full' />
+                <CardContent className='p-6 sm:p-7'>
+                    <div className='flex items-start justify-between gap-4'>
+                        <div>
+                            <p className='text-primary text-sm font-semibold'>Start learning</p>
+                            <h2 className='mt-2 text-2xl font-bold tracking-tight'>Your next useful skill.</h2>
                         </div>
-                        {/* Level */}
-                        <div className='flex flex-col gap-3'>
-                            <div className='flex items-center gap-3'>
-                                <div className='bg-primary/10 text-primary flex size-8 items-center justify-center rounded-full'>
-                                    <IconChartBar className='size-4' />
-                                </div>
-                                <div>
-                                    <p className='text-sm font-medium capitalize'>Course level</p>
-                                    <p className='text-muted-foreground text-sm'>{course?.level}</p>
-                                </div>
-                            </div>
-                        </div>
-                        {/* Category */}
-                        <div className='flex flex-col gap-3'>
-                            <div className='flex items-center gap-3'>
-                                <div className='bg-primary/10 text-primary flex size-8 items-center justify-center rounded-full'>
-                                    <IconCategory className='size-4' />
-                                </div>
-                                <div>
-                                    <p className='text-sm font-medium capitalize'>Course category</p>
-                                    <p className='text-muted-foreground text-sm'>{course?.category}</p>
-                                </div>
-                            </div>
-                        </div>
-                        {/* Total Lesson */}
-                        <div className='flex flex-col gap-3'>
-                            <div className='flex items-center gap-3'>
-                                <div className='bg-primary/10 text-primary flex size-8 items-center justify-center rounded-full'>
-                                    <IconBook className='size-4' />
-                                </div>
-                                <div>
-                                    <p className='text-sm font-medium capitalize'>Total lessons</p>
-                                    <p className='text-muted-foreground text-sm'>
-                                        {totalLessons} {totalLessons > 1 ? 'Lessons' : 'Lesson'}
-                                    </p>
-                                </div>
-                            </div>
+                        <div className='bg-primary/10 text-primary flex size-10 shrink-0 items-center justify-center rounded-xl'>
+                            <IconBook2 className='size-5' />
                         </div>
                     </div>
 
-                    <div className='mb-6 space-y-3'>
-                        <h4>This course includes:</h4>
-                        <ul className='space-y-2'>
-                            {courseBenefits?.map((item, index) => (
+                    <div className='mt-7 flex items-end justify-between gap-4'>
+                        <span className='text-muted-foreground text-sm'>One-time payment</span>
+                        <span className='text-primary text-3xl font-bold tracking-tight'>{formattedPrice}</span>
+                    </div>
+
+                    <div className='border-border/70 bg-muted/30 mt-6 divide-y rounded-2xl border'>
+                        <CourseDetailRow
+                            icon={<IconClock className='size-4' />}
+                            label='Course duration'
+                            value={`${course.duration} ${course.duration === 1 ? 'hour' : 'hours'}`}
+                        />
+                        <CourseDetailRow
+                            icon={<IconChartBar className='size-4' />}
+                            label='Course level'
+                            value={course.level}
+                        />
+                        <CourseDetailRow
+                            icon={<IconBook2 className='size-4' />}
+                            label='Total lessons'
+                            value={`${totalLessons} ${totalLessons === 1 ? 'lesson' : 'lessons'}`}
+                        />
+                    </div>
+
+                    <div className='mt-7 space-y-3'>
+                        <p className='text-sm font-semibold'>This course includes</p>
+                        <ul className='space-y-3'>
+                            {courseBenefits.map((benefit) => (
                                 <li
-                                    key={index}
-                                    className='flex items-center gap-2 text-sm'
+                                    key={benefit}
+                                    className='flex items-center gap-3 text-sm'
                                 >
-                                    <div className='rounded-full bg-green-500/10 p-1 text-green-500'>
-                                        <CheckIcon className='size-3' />
-                                    </div>
-                                    <span>{item.title}</span>
+                                    <span className='bg-primary/10 text-primary flex size-5 shrink-0 items-center justify-center rounded-full'>
+                                        <IconCheck className='size-3.5' />
+                                    </span>
+                                    <span>{benefit}</span>
                                 </li>
                             ))}
                         </ul>
                     </div>
 
-                    {isEnrolled ? (
-                        <Link
-                            href={ROUTES.USER_DASHBOARD}
-                            className={buttonVariants({ className: 'w-full' })}
-                        >
-                            Watch Course
-                        </Link>
-                    ) : (
-                        <EnrollmentButton course={course} />
-                    )}
-                    <p className='text-muted-foreground mt-3 text-center text-xs'>30-day money-back guarantee</p>
+                    <div className='mt-7'>
+                        {isEnrolled ? (
+                            <Link
+                                href={ROUTES.USER_DASHBOARD}
+                                className={buttonVariants({ className: 'h-12 w-full rounded-xl text-sm font-semibold' })}
+                            >
+                                Continue learning
+                            </Link>
+                        ) : (
+                            <EnrollmentButton course={course} />
+                        )}
+                    </div>
+
+                    <div className='text-muted-foreground mt-4 flex items-center justify-center gap-2 text-xs'>
+                        <IconLock className='size-3.5' />
+                        Secure checkout powered by Stripe
+                    </div>
                 </CardContent>
             </Card>
+        </aside>
+    )
+}
+
+function CourseDetailRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+    return (
+        <div className='flex items-center gap-3 px-4 py-3'>
+            <span className='text-primary'>{icon}</span>
+            <span className='text-muted-foreground flex-1 text-sm'>{label}</span>
+            <span className='text-foreground text-right text-sm font-semibold capitalize'>{value}</span>
         </div>
     )
 }

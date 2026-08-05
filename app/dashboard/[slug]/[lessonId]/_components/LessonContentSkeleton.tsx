@@ -6,16 +6,18 @@ import { Skeleton } from '@/components/ui/skeleton'
  */
 export default function LessonContentSkeleton() {
     return (
-        <div className='bg-background flex h-full flex-col pl-6'>
-            <Skeleton className='aspect-video w-full rounded-lg' />
+        <div className='bg-background flex min-h-full flex-col gap-6 px-4 py-4 sm:gap-8 sm:px-6 sm:py-6'>
+            <Skeleton className='aspect-video w-full rounded-xl' />
 
-            <div className='border-b py-4'>
-                <Skeleton className='h-10 w-36 rounded-md' />
+            <div className='border-border flex flex-col gap-4 border-b pb-6 sm:flex-row sm:items-center sm:justify-between'>
+                <div className='space-y-2'>
+                    <Skeleton className='h-3 w-24 rounded-md' />
+                    <Skeleton className='h-9 w-64 rounded-md' />
+                </div>
+                <Skeleton className='h-10 w-full rounded-md sm:w-36' />
             </div>
 
-            <div className='space-y-3 pt-3'>
-                <Skeleton className='h-9 w-3/4' />
-
+            <div className='max-w-3xl space-y-3'>
                 <div className='space-y-2 pt-1'>
                     <Skeleton className='h-4 w-full' />
                     <Skeleton className='h-4 w-full' />

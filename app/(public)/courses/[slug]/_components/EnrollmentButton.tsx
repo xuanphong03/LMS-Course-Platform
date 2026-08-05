@@ -28,7 +28,7 @@ export default function EnrollmentButton({ course }: { course: PublicCourseDetai
     return (
         <Button
             type='button'
-            className='w-full'
+            className='h-12 w-full rounded-xl text-sm font-semibold'
             onClick={handleEnrollment}
             disabled={pending}
         >
