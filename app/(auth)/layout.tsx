@@ -32,7 +32,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             </Link>
 
             <main className='relative mx-auto grid min-h-svh w-full max-w-7xl lg:grid-cols-[1.05fr_0.95fr]'>
-                <section className='hidden flex-col justify-between px-10 py-12 lg:flex xl:px-16'>
+                <section className='hidden flex-col justify-between px-10 py-12 lg:flex lg:px-16'>
                     <Link
                         href={ROUTES.HOME}
                         className='flex w-fit items-center gap-3 font-semibold'
@@ -51,7 +51,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
                             <Sparkles className='size-3.5' />
                             Learn with intention
                         </div>
-                        <h1 className='mt-6 text-5xl leading-[1.02] font-bold tracking-[-0.05em] xl:text-6xl'>
+                        <h1 className='mt-6 text-5xl leading-[1.02] font-bold tracking-[-0.05em] lg:text-6xl'>
                             Pick up where your <span className='text-primary'>curiosity</span> left off.
                         </h1>
                         <p className='text-muted-foreground mt-6 max-w-md text-base leading-7'>

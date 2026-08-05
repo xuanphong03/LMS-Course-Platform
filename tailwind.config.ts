@@ -12,8 +12,15 @@ const config: Config = {
     theme: {
         extend: {
             screens: {
-                lg: '1025px',
+                // Mobile kết thúc ở 639.98px; từ 640px trở lên ưu tiên dùng cùng
+                // layout non-mobile, chỉ tách tablet khi thật sự có lỗi bố cục.
+                lg: '1024px',
+                md: '1024px',
                 sm: '640px',
+                // Giữ các alias lớn hơn cùng một mốc desktop để không vô tình
+                // tạo thêm layout mới ở màn hình rộng.
+                xl: '1024px',
+                '2xl': '1024px',
                 xlg: {
                     max: '1023.98px',
                 },
