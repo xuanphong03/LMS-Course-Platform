@@ -32,9 +32,9 @@ export default async function EditCoursePage({ params }: iAppProps) {
 
     return (
         <div>
-            <h1 className='mb-8 text-3xl font-bold'>
+            <h2 className='mb-8 text-3xl font-bold'>
                 Edit course: <span className='text-primary underline'>{data.title}</span>
-            </h1>
+            </h2>
 
             <Tabs defaultValue='basic-info'>
                 <TabsList className='w-full'>

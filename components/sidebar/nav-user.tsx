@@ -28,7 +28,7 @@ interface DropdownItemProps {
 const defaultDropdownItems: DropdownItemProps[] = [
     { icon: <HomeIcon />, name: 'Homepage', href: ROUTES.HOME },
     { icon: <Tv2Icon />, name: 'Courses', href: ROUTES.ADMIN_COURSES },
-    { icon: <LayoutDashboardIcon />, name: 'User Dashboard', href: ROUTES.ADMIN },
+    { icon: <LayoutDashboardIcon />, name: 'My courses', href: ROUTES.ADMIN },
 ]
 
 export function NavUser() {
@@ -48,7 +48,7 @@ export function NavUser() {
         return [
             ...defaultDropdownItems,
             {
-                name: 'Admin Dashboard',
+                name: 'Dashboard',
                 href: ROUTES.ADMIN,
                 icon: <ShieldCheckIcon className='size-4' />,
             },

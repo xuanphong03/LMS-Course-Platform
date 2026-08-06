@@ -6,7 +6,7 @@ import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-    title: 'User Dashboard',
+    title: 'My Courses',
     description: 'User area for managing courses and learning content in LMS Course Platform.',
     robots: {
         index: false,
