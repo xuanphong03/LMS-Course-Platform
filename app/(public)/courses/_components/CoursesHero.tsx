@@ -1,6 +1,13 @@
 import { buttonVariants } from '@/components/ui/button'
+import { AnimatedHeroHeading, type AnimatedHeroMessage } from '@/app/(public)/_components/home/AnimatedHeroHeading'
 import { ArrowDownRight, Compass, LibraryBig, Sparkles } from 'lucide-react'
 import Link from 'next/link'
+
+const COURSE_TYPING_MESSAGES: readonly AnimatedHeroMessage[] = [
+    { prefix: 'Find a skill.\nStart', accent: 'today.' },
+    { prefix: 'Learn with\nfocus.', accent: 'daily.' },
+    { prefix: 'Practice\nand grow', accent: 'daily.' },
+]
 
 /**
  * Tạo điểm vào cho catalog trước khi người dùng gặp danh sách card, giúp trang
@@ -8,7 +15,7 @@ import Link from 'next/link'
  */
 export default function CoursesHero() {
     return (
-        <section className='from-primary/10 via-background to-accent/10 border-border/70 relative overflow-hidden rounded-[2rem] border bg-linear-to-br px-6 py-12 sm:px-10 sm:py-16 lg:px-14 lg:py-20'>
+        <section className='from-primary/10 via-background to-accent/10 border-border/70 relative overflow-hidden rounded-[2rem] border bg-linear-to-br px-6 py-12 sm:animate-in sm:px-10 sm:py-16 sm:duration-1000 sm:fade-in sm:zoom-in-95 lg:px-14 lg:py-20'>
             <div className='bg-primary/15 pointer-events-none absolute -top-40 -right-32 size-96 rounded-full blur-3xl dark:bg-primary/20' />
             <div className='bg-accent/15 pointer-events-none absolute -bottom-48 -left-32 size-96 rounded-full blur-3xl' />
             <div className='relative grid items-end gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-16'>
@@ -17,10 +24,11 @@ export default function CoursesHero() {
                         <Sparkles className='size-3.5' />
                         Course library
                     </div>
-                    <h1 className='mt-5 text-4xl leading-[1.04] font-bold tracking-[-0.05em] sm:text-6xl'>
-                        Find a useful skill.{' '}
-                        <span className='text-primary'>Start today.</span>
-                    </h1>
+                    <AnimatedHeroHeading
+                        messages={COURSE_TYPING_MESSAGES}
+                        minHeightClass='min-h-[2.25em]'
+                        className='mt-5 text-4xl sm:text-6xl lg:text-7xl'
+                    />
                     <p className='text-muted-foreground mt-5 max-w-xl text-base leading-7 sm:text-lg'>
                         Browse practical courses built to help you learn with focus and make progress you can feel.
                     </p>

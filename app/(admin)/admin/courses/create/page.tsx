@@ -25,7 +25,7 @@ export default function CourseCreationPage() {
                     <ArrowLeft className='size-4' />
                 </Link>
 
-                <h1>Create Course</h1>
+                <h2>Create Course</h2>
             </div>
 
             <Card>

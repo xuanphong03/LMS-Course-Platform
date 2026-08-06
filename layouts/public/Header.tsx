@@ -22,7 +22,7 @@ export interface NavigationItemProps {
 const defaultNavigationItems: NavigationItemProps[] = [
     { name: 'Home', href: ROUTES.HOME, icon: <HomeIcon className='size-4' /> },
     { name: 'Courses', href: ROUTES.PUBLIC_COURSES, icon: <BookIcon className='size-4' /> },
-    { name: 'User Dashboard', href: ROUTES.USER_DASHBOARD, icon: <LayoutDashboardIcon className='size-4' /> },
+    { name: 'My courses', href: ROUTES.USER_DASHBOARD, icon: <LayoutDashboardIcon className='size-4' /> },
 ]
 
 export default function Header() {
@@ -36,7 +36,7 @@ export default function Header() {
         return [
             ...defaultNavigationItems,
             {
-                name: 'Admin Dashboard',
+                name: 'Dashboard',
                 href: ROUTES.ADMIN,
                 icon: <ShieldCheckIcon className='size-4' />,
             },

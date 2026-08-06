@@ -29,7 +29,9 @@ export default function PublicCoursesPage() {
                                 Curated for progress
                             </div>
                             <h2 className='mt-3 text-3xl font-bold tracking-tight sm:text-4xl'>Explore all courses</h2>
-                            <p className='text-muted-foreground mt-3 max-w-xl leading-7'>Choose a focused path and keep building your next useful skill.</p>
+                            <p className='text-muted-foreground mt-3 max-w-xl leading-7'>
+                                Choose a focused path and keep building your next useful skill.
+                            </p>
                         </div>
                         <span className='text-muted-foreground inline-flex items-center gap-2 text-sm'>
                             Browse at your own pace
@@ -59,7 +61,7 @@ async function RenderCourses() {
     return (
         <>
             <p className='text-muted-foreground mt-8 text-sm'>{courses.length} courses available</p>
-            <div className='mt-5 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
+            <div className='mt-5 grid grid-cols-1 gap-6 md:grid-cols-3'>
                 {courses.map((course) => (
                     <PublicCourseCard
                         key={course.id}
@@ -74,7 +76,7 @@ async function RenderCourses() {
 
 function LoadingSkeletonLayout() {
     return (
-        <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
+        <div className='grid grid-cols-1 gap-6 md:grid-cols-3'>
             {Array.from({ length: 9 }).map((_, index) => (
                 <PublicCourseCardSkeleton key={index} />
             ))}

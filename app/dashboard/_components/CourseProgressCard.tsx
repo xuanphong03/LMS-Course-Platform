@@ -40,14 +40,14 @@ export default function CourseProgressCard({ data, className }: CourseProgressCa
                 </Link>
                 <CardContent className='flex flex-1 flex-col justify-between p-4'>
                     <div>
-                        <h4>
-                            <Link
-                                className='group-hover:text-primary line-clamp-2 text-lg font-medium transition-colors hover:underline'
-                                href={ROUTES.USER_DASHBOARD_COURSE_DETAIL(data.slug)}
-                            >
+                        <Link
+                            className='block'
+                            href={ROUTES.USER_DASHBOARD_COURSE_DETAIL(data.slug)}
+                        >
+                            <h3 className='group-hover:text-primary line-clamp-2 text-lg font-medium transition-colors hover:underline'>
                                 {data?.title}
-                            </Link>
-                        </h4>
+                            </h3>
+                        </Link>
                         <p className='text-muted-foreground mt-2 line-clamp-2 text-sm leading-tight'>
                             {data?.shortDescription}
                         </p>
